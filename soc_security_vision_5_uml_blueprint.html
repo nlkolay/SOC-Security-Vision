@@ -1,0 +1,2955 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SOC Security Vision 5 — Интерактивная UML 2.5 Архитектура ЦОД</title>
+    <!-- Подключение Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Инженерные шрифты Inter и JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        soc: {
+                            bg: '#060a12',
+                            panel: '#0b1120',
+                            card: '#0f172a',
+                            border: '#1e293b',
+                            cyan: '#06b6d4',
+                            emerald: '#10b981',
+                            amber: '#f59e0b',
+                            rose: '#f43f5e',
+                            purple: '#a855f7'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: #060a12;
+            color: #f8fafc;
+            overflow: hidden;
+            user-select: none;
+        }
+        /* Гарантированно непрозрачные фоны для исключения просвечивания текста */
+        .solid-bg-main {
+            background-color: #060a12 !important;
+        }
+        .solid-bg-panel {
+            background-color: #0b1120 !important;
+        }
+        .solid-bg-card {
+            background-color: #0f172a !important;
+        }
+        .solid-bg-elevated {
+            background-color: #131c31 !important;
+        }
+        /* Инженерная миллиметровая CAD-сетка */
+        .cad-grid {
+            background-color: #060a12;
+            background-image:
+                linear-gradient(to right, rgba(30, 41, 59, 0.45) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(30, 41, 59, 0.45) 1px, transparent 1px),
+                linear-gradient(to right, rgba(6, 182, 212, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(6, 182, 212, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+        }
+        /* Кастомные скроллбары */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #060a12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Анимация потоков данных по линиям UML */
+        @keyframes packetFlow {
+            to {
+                stroke-dashoffset: -28;
+            }
+        }
+        .uml-edge-animated {
+            stroke-dasharray: 8 6;
+            animation: packetFlow 0.85s linear infinite;
+        }
+        .uml-edge-static {
+            stroke-dasharray: none;
+        }
+        /* Стили узлов UML */
+        .uml-node {
+            transition: filter 0.18s ease;
+            cursor: pointer;
+        }
+        .uml-node:hover {
+            filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.45));
+        }
+        .uml-node.active-node .node-bg {
+            stroke-width: 3.5px !important;
+            filter: drop-shadow(0 0 16px rgba(34, 211, 238, 0.65));
+        }
+        /* Стили чипов аббревиатур */
+        .abbr-chip {
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .abbr-chip:hover {
+            filter: brightness(1.25);
+        }
+        /* Рамка эмулятора  на десктопе */
+        .s25-frame-emulator {
+            width: 412px !important;
+            height: 860px !important;
+            max-height: calc(100vh - 68px) !important;
+            margin: auto !important;
+            border: 10px solid #1e293b !important;
+            border-radius: 40px !important;
+            box-shadow: 0 0 0 2px #0f172a, 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(6, 182, 212, 0.25) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            flex: none !important;
+            background-color: #060a12 !important;
+        }
+        /* Пульсация выбранной сетевой зоны */
+        @keyframes zonePulse {
+            0%, 100% { stroke-opacity: 1; filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.5)); }
+            50% { stroke-opacity: 0.65; filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.2)); }
+        }
+        .active-zone-rect {
+            stroke-width: 3.2px !important;
+            stroke-dasharray: none !important;
+            animation: zonePulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col font-sans antialiased overflow-hidden solid-bg-main">
+
+    <!-- ВЕРХНЯЯ ИНЖЕНЕРНАЯ ПАНЕЛЬ НАВИГАЦИИ -->
+    <header id="app-header" class="min-h-[52px] py-1.5 solid-bg-panel border-b border-slate-800 px-3 lg:px-4 flex items-center justify-between gap-2 z-30 shrink-0">
+        <!-- Лого и статус системы -->
+        <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-mono font-bold text-xs shadow-inner shrink-0">
+                SV5
+            </div>
+            <div class="min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <h1 class="font-bold text-xs sm:text-sm lg:text-base tracking-tight text-white whitespace-nowrap">SOC SECURITY VISION 5</h1>
+                    <span class="hidden xl:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 whitespace-nowrap">
+                        UML 2.5 BLUEPRINT
+                    </span>
+                    <span id="device-badge" class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 whitespace-nowrap">
+                        AUTO: DESKTOP
+                    </span>
+                </div>
+                <p class="text-[10px] text-slate-400 font-mono truncate hidden lg:block">
+                    7 зон TCVN 11930:2017 (Cấp độ 3–5) • 18 узлов • 25 верифицированных стыков • 45 интерактивных аббревиатур
+                </p>
+            </div>
+        </div>
+
+        <!-- Поиск аббревиатуры и переключатели -->
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <!-- Глобальный поиск по аббревиатурам и узлам -->
+            <div class="relative hidden sm:block w-44 md:w-56 lg:w-64">
+                <input id="global-search" type="text" placeholder="Поиск: SIEM, KRaft, RELP, NCSC..." 
+                    class="w-full solid-bg-main border border-slate-700 focus:border-cyan-400 rounded-lg pl-7 pr-2.5 py-1 text-xs font-mono text-slate-200 placeholder-slate-500 outline-none transition">
+                <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <div id="search-dropdown" class="hidden absolute left-0 right-0 mt-1 solid-bg-panel border border-slate-700 rounded-lg shadow-2xl max-h-72 overflow-y-auto z-50 divide-y divide-slate-800"></div>
+            </div>
+
+            <!-- Кнопки модальных окон -->
+            <button onclick="openModal('glossary-modal')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono text-cyan-300 flex items-center gap-1.5 transition shrink-0" title="Полный справочник аббревиатур и валидатор ссылок">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                <span class="hidden md:inline whitespace-nowrap">Глоссарий (45)</span>
+            </button>
+
+            <button onclick="openModal('calc-modal')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono text-emerald-300 flex items-center gap-1.5 transition shrink-0" title="Калькулятор сайзинга ЦОД SOC">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                <span class="hidden md:inline whitespace-nowrap">Сайзинг EPS</span>
+            </button>
+
+            <!-- Переключатель режима Desktop / Samsung S25 -->
+            <div class="flex items-center solid-bg-main p-0.5 rounded-lg border border-slate-700 shrink-0">
+                <button onclick="switchInterfaceMode('desktop')" id="btn-mode-desktop" class="px-2 py-1 rounded text-[11px] font-mono flex items-center gap-1 transition bg-cyan-500 text-slate-950 font-semibold whitespace-nowrap" title="Режим рабочей станции архитектора (Desktop)">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <span>Desktop</span>
+                </button>
+                <button onclick="switchInterfaceMode('s25')" id="btn-mode-s25" class="px-2 py-1 rounded text-[11px] font-mono flex items-center gap-1 transition text-slate-400 hover:text-white whitespace-nowrap" title="Мобильный режим ()">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    <span>Mobile</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ОСНОВНОЙ РАБОЧИЙ КОНТЕЙНЕР (АДАПТИРУЕТСЯ ПОД DESKTOP ИЛИ РАМКУ SAMSUNG S25) -->
+    <div id="workspace-wrapper" class="flex-1 flex overflow-hidden relative solid-bg-main">
+
+        <!-- ЛЕВАЯ БОКОВАЯ ПАНЕЛЬ (ДЛЯ DESKTOP-РЕЖИМА) -->
+        <aside id="left-sidebar" class="w-72 solid-bg-panel border-r border-slate-800 flex flex-col z-20 shrink-0 select-text overflow-y-auto transition-all">
+            <div class="px-3.5 py-2.5 border-b border-slate-800 flex items-center justify-between solid-bg-card sticky top-0 z-10">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-cyan-400 font-bold">Навигатор ЦОД (7 зон)</span>
+                    <button onclick="showAbbrBubble('TCVN 11930:2017', event)" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30">TCVN</button>
+                </div>
+                <button onclick="toggleLeftSidebar(false)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-mono transition">
+                    ◀ Скрыть
+                </button>
+            </div>
+
+            <!-- Список 7 сетевых зон -->
+            <div class="p-3 border-b border-slate-800">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] text-slate-400 leading-tight">Клик фокусирует зону целиком:</span>
+                    <button onclick="fitDiagramToScreen(true)" class="text-[10px] font-mono text-cyan-400 hover:underline shrink-0 ml-1">Сброс 100%</button>
+                </div>
+                <div id="zones-nav-list" class="space-y-1.5"></div>
+            </div>
+
+            <!-- 3 Домена и 6 Low-Code Конструкторов Security Vision 5 -->
+            <div class="p-3 border-b border-slate-800">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-semibold">Домены & 6 Конструкторов</span>
+                    <button onclick="showAbbrBubble('No-Code', event)" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Low-Code</button>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5 mb-2.5">
+                    <button onclick="showAbbrBubble('SOT', event)" class="p-1.5 rounded solid-bg-card border border-cyan-700/50 text-center hover:border-cyan-400 transition">
+                        <div class="font-mono font-bold text-xs text-cyan-300">SOT</div>
+                        <div class="text-[9px] text-slate-400">Операции</div>
+                    </button>
+                    <button onclick="showAbbrBubble('SDA', event)" class="p-1.5 rounded solid-bg-card border border-purple-700/50 text-center hover:border-purple-400 transition">
+                        <div class="font-mono font-bold text-xs text-purple-300">SDA</div>
+                        <div class="text-[9px] text-slate-400">Аналитика</div>
+                    </button>
+                    <button onclick="showAbbrBubble('SGRC', event)" class="p-1.5 rounded solid-bg-card border border-emerald-700/50 text-center hover:border-emerald-400 transition">
+                        <div class="font-mono font-bold text-xs text-emerald-300">SGRC</div>
+                        <div class="text-[9px] text-slate-400">Комплаенс</div>
+                    </button>
+                </div>
+                <div class="space-y-1 text-[11px] text-slate-300 font-mono">
+                    <div onclick="focusNode('n_web')" class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
+                        <span>1. Конструктор объектов</span>
+                        <span class="text-[9px] text-cyan-400">2D/3D Graph</span>
+                    </div>
+                    <div onclick="focusNode('n_services')" class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
+                        <span>2. Workflow Engine</span>
+                        <span class="text-[9px] text-emerald-400">Playbooks</span>
+                    </div>
+                    <div onclick="focusNode('n_conn_dmz')" class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
+                        <span>3. Конструктор интеграций</span>
+                        <span class="text-[9px] text-amber-400">150+ СЗИ</span>
+                    </div>
+                    <div onclick="focusNode('n_services')" class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
+                        <span>4. Редактор отчетов</span>
+                        <span class="text-[9px] text-purple-400">PDF/DOCX</span>
+                    </div>
+                    <div onclick="focusNode('n_web')" class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
+                        <span>5. Конструктор BI</span>
+                        <span class="text-[9px] text-cyan-400">Dashboards</span>
+                    </div>
+                    <div onclick="focusNode('n_web')" class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
+                        <span>6. Редактор меню и RBAC</span>
+                        <span class="text-[9px] text-rose-400">Multi-Tenant</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Легенда сетевых стыков UML -->
+            <div class="p-3">
+                <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold mb-2">Типы сетевых стыков UML</div>
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-0.5 bg-cyan-400 inline-block"></span>
+                        <span class="text-slate-300 font-mono text-[11px]">Поток телеметрии (Ingest)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-0.5 bg-rose-500 inline-block"></span>
+                        <span class="text-slate-300 font-mono text-[11px]">Команды блокировки (SOAR IR)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-0.5 bg-amber-400 inline-block"></span>
+                        <span class="text-slate-300 font-mono text-[11px]">Кворум Raft / Репликация БД</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-0.5 bg-emerald-400 inline-block"></span>
+                        <span class="text-slate-300 font-mono text-[11px]">Регуляторы (NCSC / ГосСОПКА)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-0.5 bg-purple-400 inline-block"></span>
+                        <span class="text-slate-300 font-mono text-[11px]">Out-of-Band (PAM / IPMI / Backup)</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ЦЕНТРАЛЬНАЯ РАБОЧАЯ ОБЛАСТЬ -->
+        <main id="canvas-viewport" class="flex-1 cad-grid relative overflow-hidden flex flex-col min-w-0">
+
+            <!-- ВЕРХНЯЯ ПАНЕЛЬ ИНСТРУМЕНТОВ ХОЛСТА (ТОЛЬКО ДЛЯ DESKTOP) -->
+            <div id="desktop-canvas-toolbar" class="z-10 solid-bg-panel border-b border-slate-800 px-2.5 py-1.5 flex flex-col gap-1.5 shrink-0">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button id="btn-toggle-left" onclick="toggleLeftSidebar()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[10px] font-mono text-cyan-300 flex items-center gap-1 transition whitespace-nowrap">
+                            <span>◧ Скрыть зоны</span>
+                        </button>
+
+                        <div class="flex items-center solid-bg-main p-0.5 rounded-lg border border-slate-800 text-[10px] font-mono overflow-x-auto no-scrollbar">
+                            <button onclick="setLayerFilter('ALL')" id="filter-ALL" class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-medium whitespace-nowrap">Все стыки (25)</button>
+                            <button onclick="setLayerFilter('INGEST')" id="filter-INGEST" class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">Телеметрия</button>
+                            <button onclick="setLayerFilter('SOAR')" id="filter-SOAR" class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">SOAR IR</button>
+                            <button onclick="setLayerFilter('HA')" id="filter-HA" class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">HA/Raft</button>
+                            <button onclick="setLayerFilter('REG')" id="filter-REG" class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">Регуляторы</button>
+                        </div>
+                    </div>
+
+                    <button id="btn-toggle-right" onclick="toggleRightInspector()" class="px-2.5 py-0.5 rounded bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-[10px] font-mono text-cyan-300 flex items-center gap-1 transition whitespace-nowrap shrink-0">
+                        <span id="btn-toggle-right-text">Скрыть инспектор ✕</span>
+                    </button>
+                </div>
+
+                <!-- Лента быстрых интерактивных аббревиатур -->
+                <div class="flex items-center gap-1 overflow-x-auto no-scrollbar whitespace-nowrap py-0.5 border-t border-slate-800 pt-1">
+                    <span class="text-[10px] font-mono text-slate-400 mr-1 shrink-0">Термины:</span>
+                    <button onclick="showAbbrBubble('SOC', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shrink-0">SOC</button>
+                    <button onclick="showAbbrBubble('NG SOAR', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">NG SOAR</button>
+                    <button onclick="showAbbrBubble('SIEM', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shrink-0">SIEM</button>
+                    <button onclick="showAbbrBubble('EDR', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/15 text-rose-300 border border-rose-500/30 shrink-0">EDR</button>
+                    <button onclick="showAbbrBubble('KRaft', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">KRaft</button>
+                    <button onclick="showAbbrBubble('ClickHouse', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">ClickHouse</button>
+                    <button onclick="showAbbrBubble('PostgreSQL', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/15 text-rose-300 border border-rose-500/30 shrink-0">PostgreSQL HA</button>
+                    <button onclick="showAbbrBubble('RELP', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500/15 text-purple-300 border border-purple-500/30 shrink-0">RELP</button>
+                    <button onclick="showAbbrBubble('TAP', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-blue-500/15 text-blue-300 border border-blue-500/30 shrink-0">TAP</button>
+                    <button onclick="showAbbrBubble('NPB', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-blue-500/15 text-blue-300 border border-blue-500/30 shrink-0">NPB</button>
+                    <button onclick="showAbbrBubble('NCSC', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">NCSC</button>
+                    <button onclick="showAbbrBubble('VNCERT/CC', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">VNCERT/CC</button>
+                    <button onclick="showAbbrBubble('A05 MPS', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">A05 MPS (72ч)</button>
+                    <button onclick="showAbbrBubble('ГосСОПКА', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">ГосСОПКА</button>
+                    <button onclick="showAbbrBubble('CVSS', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/15 text-rose-300 border border-rose-500/30 shrink-0">CVSS/EPSS</button>
+                    <button onclick="showAbbrBubble('HITL', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">HITL</button>
+                </div>
+            </div>
+
+            <!-- СПЕЦИАЛИЗИРОВАННАЯ ВЕРХНЯЯ ПАНЕЛЬ ДЛЯ МОБИЛЬНОГО РЕЖИМА  (100% НЕПРОЗРАЧНАЯ) -->
+            <div id="s25-top-header" class="hidden z-20 solid-bg-panel border-b border-slate-800 px-3 pt-2 pb-2 flex flex-col gap-2 shrink-0 shadow-lg">
+                <!-- Имитация статус-бара смартфона S25 + Переключатель вида UML -->
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                        <span class="text-[11px] font-mono font-bold text-white tracking-tight">Mobile UML</span>
+                    </div>
+                    <!-- Переключатель между читаемым вертикальным UML-потоком и 2D-чертежом -->
+                    <div class="flex items-center solid-bg-main p-0.5 rounded-lg border border-slate-700 text-[10px] font-mono">
+                        <button id="btn-s25-view-cards" onclick="setS25ViewMode('cards')" class="px-2 py-1 rounded bg-cyan-500 text-slate-950 font-bold transition">
+                            📱 UML-Поток
+                        </button>
+                        <button id="btn-s25-view-canvas" onclick="setS25ViewMode('canvas')" class="px-2 py-1 rounded text-slate-300 hover:text-white transition">
+                            📐 2D Чертеж
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Горизонтальный фильтр по 7 сетевым зонам ЦОД в S25 -->
+                <div id="s25-zone-pills" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar whitespace-nowrap py-0.5">
+                    <button onclick="selectS25ZoneFilter('ALL')" id="s25-pill-ALL" class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-semibold bg-cyan-500 text-slate-950 shrink-0">Все 7 зон (18)</button>
+                    <button onclick="selectS25ZoneFilter('z_ext')" id="s25-pill-z_ext" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-sky-300 border border-slate-700 shrink-0">0. Внешний & Wi-Fi</button>
+                    <button onclick="selectS25ZoneFilter('z_edge')" id="s25-pill-z_edge" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-cyan-300 border border-slate-700 shrink-0">1. Edge / TAP / NPB</button>
+                    <button onclick="selectS25ZoneFilter('z_dmz')" id="s25-pill-z_dmz" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-amber-300 border border-slate-700 shrink-0">2. Ingest DMZ</button>
+                    <button onclick="selectS25ZoneFilter('z_srv')" id="s25-pill-z_srv" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-emerald-300 border border-slate-700 shrink-0">3. Ядро SV5 & Kafka</button>
+                    <button onclick="selectS25ZoneFilter('z_db')" id="s25-pill-z_db" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-rose-300 border border-slate-700 shrink-0">4. СУБД & Keeper</button>
+                    <button onclick="selectS25ZoneFilter('z_admin')" id="s25-pill-z_admin" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-purple-300 border border-slate-700 shrink-0">5. Смена SOC L1-L3</button>
+                    <button onclick="selectS25ZoneFilter('z_oob')" id="s25-pill-z_oob" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-fuchsia-300 border border-slate-700 shrink-0">6. OOB / PAM / NTP</button>
+                </div>
+            </div>
+
+            <!-- МОБИЛЬНЫЙ ВЕРТИКАЛЬНЫЙ UML-ПОТОК ДЛЯ SAMSUNG S25 (100% НЕПРОЗРАЧНЫЙ, КРИСТАЛЬНО ЧИТАЕМЫЙ) -->
+            <div id="s25-vertical-uml-view" class="hidden flex-1 overflow-y-auto px-3 pt-2.5 pb-20 space-y-4 solid-bg-main select-text">
+                <!-- Заполняется динамически из JS -->
+            </div>
+
+            <!-- ГЛАВНЫЙ МАСШТАБИРУЕМЫЙ 2D SVG-ЧЕРТЕЖ UML 2.5 -->
+            <div id="svg-stage" class="flex-1 w-full h-full relative overflow-hidden cursor-grab active:cursor-grabbing">
+                <svg id="uml-svg" class="w-full h-full block" xmlns="http://www.w3.org/2000/svg">
+                    <defs id="uml-svg-defs">
+                        <marker id="arrow-cyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#22d3ee" />
+                        </marker>
+                        <marker id="arrow-rose" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#fb7185" />
+                        </marker>
+                        <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24" />
+                        </marker>
+                        <marker id="arrow-emerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399" />
+                        </marker>
+                        <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#c084fc" />
+                        </marker>
+                    </defs>
+
+                    <g id="uml-camera-group">
+                        <g id="uml-zones-layer"></g>
+                        <g id="uml-edges-layer"></g>
+                        <g id="uml-nodes-layer"></g>
+                        <g id="uml-edge-labels-layer"></g>
+                    </g>
+                </svg>
+
+                <!-- ПЛАВАЮЩИЕ КОНТРОЛЫ КАМЕРЫ НА 2D-ЧЕРТЕЖЕ -->
+                <div id="floating-zoom-bar" class="absolute bottom-4 left-4 z-20 flex items-center gap-1.5 solid-bg-panel border border-slate-700 p-1.5 rounded-xl shadow-2xl">
+                    <button onclick="zoomCamera(1.25)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-mono font-bold text-base transition" title="Приблизить (+)">+</button>
+                    <button onclick="zoomCamera(0.8)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-mono font-bold text-base transition" title="Отдалить (-)">−</button>
+                    <button onclick="fitDiagramToScreen(true)" class="px-2.5 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-xs transition" title="Вписать весь чертеж целиком">Весь чертеж</button>
+                    <button onclick="focusReadableCore()" class="px-2.5 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 font-mono text-xs transition" title="Крупный план ядра Security Vision 5">Ядро SV5</button>
+                    <button onclick="toggleFlowAnimation()" id="btn-toggle-anim" class="px-2.5 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-mono text-xs transition flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                        <span class="hidden sm:inline">Потоки: ВКЛ</span>
+                    </button>
+                </div>
+
+                <!-- ПОШАГОВЫЙ НАВИГАТОР ПО УЗЛАМ ДЛЯ 2D-ЧЕРТЕЖА В РЕЖИМЕ S25 -->
+                <div id="s25-canvas-stepper" class="hidden absolute bottom-16 inset-x-2.5 z-20 solid-bg-panel border border-cyan-500/50 rounded-xl p-2 shadow-2xl flex items-center justify-between gap-2">
+                    <button onclick="stepMobileNode(-1)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-xs font-bold shrink-0">◀ Пред.</button>
+                    <div onclick="toggleMobileInspectorSheet(true)" class="min-w-0 flex-1 text-center cursor-pointer">
+                        <div id="s25-stepper-title" class="text-xs font-bold text-white truncate">Кластер 7 Фоновых Сервисов</div>
+                        <div class="text-[10px] font-mono text-cyan-400">Нажмите для открытия спецификации ⓘ</div>
+                    </div>
+                    <button onclick="stepMobileNode(1)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-xs font-bold shrink-0">След. ▶</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- ПРАВАЯ ИНСПЕКТОР-ПАНЕЛЬ (ДЛЯ DESKTOP-РЕЖИМА) -->
+        <aside id="right-inspector" class="w-80 lg:w-96 solid-bg-panel border-l border-slate-800 flex flex-col z-20 shrink-0 select-text overflow-y-auto transition-all">
+            <div class="px-4 py-2.5 border-b border-slate-800 flex items-center justify-between solid-bg-card sticky top-0 z-10">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-cyan-300 font-bold">Инспектор спецификаций</span>
+                </div>
+                <button onclick="toggleRightInspector(false)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 border border-slate-700 text-slate-300 text-xs font-mono transition flex items-center gap-1">
+                    <span>Скрыть</span>
+                    <span>✕</span>
+                </button>
+            </div>
+            <div id="inspector-content" class="p-4 space-y-4"></div>
+        </aside>
+
+        <!-- НИЖНИЙ ДОК НАВИГАЦИИ ДЛЯ РЕЖИМА  (100% НЕПРОЗРАЧНЫЙ) -->
+        <div id="mobile-s25-bar" class="hidden absolute bottom-0 left-0 right-0 solid-bg-panel border-t border-slate-800 px-2 py-1.5 z-30 flex items-center justify-around shadow-2xl">
+            <button onclick="setS25ViewMode('cards')" id="nav-s25-flow" class="flex flex-col items-center gap-0.5 text-cyan-400 font-mono text-[10px] px-2 py-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                <span>UML-Поток</span>
+            </button>
+            <button onclick="setS25ViewMode('canvas')" id="nav-s25-cad" class="flex flex-col items-center gap-0.5 text-slate-400 font-mono text-[10px] px-2 py-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                <span>2D Чертеж</span>
+            </button>
+            <button onclick="toggleMobileInspectorSheet(true)" class="flex flex-col items-center gap-0.5 text-emerald-400 font-mono text-[10px] px-2 py-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                <span>Инспектор</span>
+            </button>
+            <button onclick="openModal('glossary-modal')" class="flex flex-col items-center gap-0.5 text-amber-400 font-mono text-[10px] px-2 py-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                <span>Глоссарий</span>
+            </button>
+            <button onclick="openModal('calc-modal')" class="flex flex-col items-center gap-0.5 text-purple-400 font-mono text-[10px] px-2 py-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                <span>Сайзинг</span>
+            </button>
+        </div>
+
+        <!-- ЗАТЕМНЯЮЩАЯ ПОДЛОЖКА И 100% НЕПРОЗРАЧНЫЙ BOTTOM-SHEET ИНСПЕКТОРА ДЛЯ SAMSUNG S25 -->
+        <div id="mobile-sheet-backdrop" onclick="toggleMobileInspectorSheet(false)" class="hidden absolute inset-0 bg-black/80 z-30 transition-opacity"></div>
+        <div id="mobile-bottom-sheet" class="hidden absolute inset-x-0 bottom-14 solid-bg-panel border-t-2 border-cyan-400 rounded-t-3xl shadow-2xl z-40 max-h-[78%] flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800 solid-bg-card shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                    <span class="text-xs font-mono text-cyan-300 uppercase font-bold">Спецификация узла / стыка</span>
+                </div>
+                <button onclick="toggleMobileInspectorSheet(false)" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-200 text-xs font-mono font-semibold border border-slate-700">
+                    Закрыть ✕
+                </button>
+            </div>
+            <div id="mobile-inspector-body" class="p-4 overflow-y-auto space-y-4 select-text solid-bg-panel"></div>
+        </div>
+    </div>
+
+    <!-- ВСПЛЫВАЮЩИЙ ИНТЕРАКТИВНЫЙ БАББЛ АББРЕВИАТУРЫ (100% НЕПРОЗРАЧНЫЙ) -->
+    <div id="abbr-bubble" class="hidden fixed z-50 w-[340px] sm:w-[370px] solid-bg-panel border-2 border-cyan-400 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-4 select-text">
+        <div class="flex items-start justify-between gap-2 border-b border-slate-800 pb-2.5">
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span id="bubble-code" class="font-mono font-bold text-base text-cyan-300">SIEM</span>
+                    <span id="bubble-domain" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">SOT Domain</span>
+                </div>
+                <div id="bubble-full" class="text-xs font-semibold text-white mt-1 leading-snug">Security Information and Event Management</div>
+            </div>
+            <button onclick="hideAbbrBubble()" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono shrink-0">✕</button>
+        </div>
+        <p id="bubble-desc" class="text-xs text-slate-200 mt-2.5 leading-relaxed"></p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between gap-2">
+            <span class="text-[10px] font-mono text-emerald-400 flex items-center gap-1 shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                
+            </span>
+            <a id="bubble-link-url" href="#" target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-cyan-300 hover:text-cyan-200 underline flex items-center gap-1 truncate">
+                <span id="bubble-link-title" class="truncate">Wikipedia</span>
+                <span>↗</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО: ПОЛНЫЙ ГЛОССАРИЙ И ВАЛИДАТОР ССЫЛОК (100% НЕПРОЗРАЧНОЕ) -->
+    <div id="glossary-modal" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-3 sm:p-6 select-text">
+        <div class="solid-bg-panel border border-slate-700 rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between solid-bg-card">
+                <div>
+                    <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                        <span class="text-cyan-400 font-mono">[ГЛОССАРИЙ SOC SV5]</span>
+                        <span>45 терминов, протоколов и стандартов СРВ / РФ / Международных</span>
+                    </h2>
+                    <p class="text-[11px] text-slate-400 font-mono">Все энциклопедические и нормативные ссылки провалидированы (HTTP 200 OK)</p>
+                </div>
+                <button onclick="closeModal('glossary-modal')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 font-mono text-xs border border-slate-700">Закрыть ✕</button>
+            </div>
+            <div class="p-3 border-b border-slate-800 solid-bg-main">
+                <input id="glossary-filter-input" type="text" placeholder="Фильтр по аббревиатуре, расшифровке или домену (например: KRaft, NCSC, TCVN, RELP, EDR)..."
+                    class="w-full solid-bg-card border border-slate-700 focus:border-cyan-400 rounded-xl px-3.5 py-2 text-xs font-mono text-white placeholder-slate-500 outline-none">
+            </div>
+            <div id="glossary-grid" class="p-4 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3 solid-bg-panel"></div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО: ИНЖЕНЕРНЫЙ КАЛЬКУЛЯТОР САЙЗИНГА ЦОД И СЦЕНАРИИ ТРАБЛШУТИНГА -->
+    <div id="calc-modal" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-3 sm:p-6 select-text">
+        <div class="solid-bg-panel border border-slate-700 rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between solid-bg-card">
+                <div>
+                    <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                        <span class="text-emerald-400 font-mono">[САЙЗИНГ ЦОД & ТЮНИНГ]</span>
+                        <span>Математический расчет мощности по формулам документа</span>
+                    </h2>
+                    <p class="text-[11px] text-slate-400 font-mono">Расчет полосы пропускания, СХД ClickHouse (Hot/Warm/Cold), брокеров Kafka и узлов Security Vision 5</p>
+                </div>
+                <button onclick="closeModal('calc-modal')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 font-mono text-xs border border-slate-700">Закрыть ✕</button>
+            </div>
+
+            <div class="p-4 overflow-y-auto space-y-5 solid-bg-panel">
+                <!-- Ползунки и параметры калькулятора -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 solid-bg-card p-4 rounded-xl border border-slate-800">
+                    <div>
+                        <label class="text-[11px] font-mono text-slate-400 block">Поток событий (EPS):</label>
+                        <input id="calc-eps" type="number" value="25000" min="1000" max="300000" step="1000" onchange="runSizingCalculator()"
+                            class="w-full mt-1 solid-bg-main border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-sm text-cyan-300 font-bold">
+                        <div class="flex gap-1 mt-1.5">
+                            <button onclick="setQuickEps(10000)" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-cyan-300">10k</button>
+                            <button onclick="setQuickEps(25000)" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300">25k</button>
+                            <button onclick="setQuickEps(50000)" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-cyan-300">50k</button>
+                            <button onclick="setQuickEps(100000)" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">100k</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-mono text-slate-400 block">Средний размер лога (Байт):</label>
+                        <input id="calc-size" type="number" value="600" min="200" max="4096" step="50" onchange="runSizingCalculator()"
+                            class="w-full mt-1 solid-bg-main border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-sm text-white">
+                        <span class="text-[10px] text-slate-500 font-mono">Норма: 500–800 байт</span>
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-mono text-slate-400 block">Срок хранения (Retention, сут):</label>
+                        <input id="calc-days" type="number" value="90" min="14" max="730" step="10" onchange="runSizingCalculator()"
+                            class="w-full mt-1 solid-bg-main border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-sm text-white">
+                        <span class="text-[10px] text-slate-500 font-mono">Hot 14д + Warm 76д + Cold S3</span>
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-mono text-slate-400 block">Сжатие СУБД (C_ratio):</label>
+                        <select id="calc-compression" onchange="runSizingCalculator()" class="w-full mt-1 solid-bg-main border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-xs text-emerald-300">
+                            <option value="6">ClickHouse ZSTD (6x сжатие)</option>
+                            <option value="1.5">OpenSearch (1.5x сжатие)</option>
+                        </select>
+                        <span class="text-[10px] text-slate-500 font-mono">R_factor = 2 • k_margin = 1.30</span>
+                    </div>
+                </div>
+
+                <!-- Результаты расчета -->
+                <div id="calc-results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+
+                <!-- Памятка по аварийному траблшутингу из документа -->
+                <div class="solid-bg-card border border-slate-800 rounded-xl p-4">
+                    <h3 class="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold mb-2.5">Инженерный практикум: 4 ключевых аварийных сценария и тюнинг</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="solid-bg-main p-3 rounded-lg border border-slate-800">
+                            <div class="font-mono font-bold text-cyan-300">1. Потери Syslog UDP (rx_missed_errors / UdpRcvbufErrors)</div>
+                            <p class="text-slate-300 mt-1 leading-relaxed">Проверка NIC: <code class="text-amber-300 font-mono">ethtool -S eth0</code> → расширение Ring Buffer: <code class="text-emerald-300 font-mono">ethtool -G eth0 rx 4096 tx 4096</code>. В ядре Linux: <code class="text-emerald-300 font-mono">net.core.rmem_max=67108864</code> (64 МБ), <code class="text-emerald-300 font-mono">netdev_max_backlog=100000</code>.</p>
+                        </div>
+                        <div class="solid-bg-main p-3 rounded-lg border border-slate-800">
+                            <div class="font-mono font-bold text-rose-300">2. ClickHouse перешел в Read-Only Mode</div>
+                            <p class="text-slate-300 mt-1 leading-relaxed">Проверка кворума: <code class="text-amber-300 font-mono">echo mntr | nc keeper-1 9181</code>. Причина — I/O spikes от слияний (merges) при совмещении ролей. Вынести <strong>ClickHouse Keeper</strong> на 3 выделенных узла с NVMe.</p>
+                        </div>
+                        <div class="solid-bg-main p-3 rounded-lg border border-slate-800">
+                            <div class="font-mono font-bold text-amber-300">3. Рост Consumer Lag в Apache Kafka</div>
+                            <p class="text-slate-300 mt-1 leading-relaxed">При Data Skew в одной партиции — переключить продюсер на <code class="text-emerald-300 font-mono">Round-Robin</code>. При равномерном лаге — укрупнить пачки в Vector: <code class="text-emerald-300 font-mono">batch.max_events=100000</code>, <code class="text-emerald-300 font-mono">batch.timeout_secs=5</code>.</p>
+                        </div>
+                        <div class="solid-bg-main p-3 rounded-lg border border-slate-800">
+                            <div class="font-mono font-bold text-emerald-300">4. Тюнинг PostgreSQL HA (64 ГБ RAM, до 300k хостов)</div>
+                            <p class="text-slate-300 mt-1 leading-relaxed"><code class="text-cyan-300 font-mono">shared_buffers=16GB</code>, <code class="text-cyan-300 font-mono">effective_cache_size=48GB</code>, <code class="text-cyan-300 font-mono">work_mem=64MB–128MB</code>, защита от Table Bloat: <code class="text-cyan-300 font-mono">autovacuum_vacuum_scale_factor=0.02</code> + пулер <strong>PgBouncer</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================================
+        // 1. ПОЛНЫЙ СЛОВАРЬ АББРЕВИАТУР И ТЕРМИНОВ С ПРОВЕРЕННЫМИ ССЫЛКАМИ (45 ЗАПИСЕЙ)
+        // =========================================================================================
+        const ABBR_DICTIONARY = {
+            "SOC": {
+                full: "Security Operations Center / Trung tâm giám sát điều hành an toàn, an ninh mạng",
+                domain: "Core Operations",
+                desc: "Центр мониторинга и оперативного реагирования на инциденты ИБ в режиме 24/7/365. По Решению 1356/QĐ-BTTTT обязан иметь уровень защищенности не ниже Уровня 3 (Cấp độ 3) и штат минимум 12 сертифицированных специалистов.",
+                url: "https://en.wikipedia.org/wiki/Security_operations_center",
+                sourceTitle: "Wikipedia: Security Operations Center"
+            },
+            "MSSP": {
+                full: "Managed Security Service Provider",
+                domain: "Business Model",
+                desc: "Коммерческий провайдер управляемых услуг ИБ, обслуживающий множество независимых министерств и корпораций (тенантов) в рамках мультитенантной инсталляции Security Vision 5 (Слой 2 Модели «4 слоев»).",
+                url: "https://en.wikipedia.org/wiki/Managed_security_service",
+                sourceTitle: "Wikipedia: Managed Security Service"
+            },
+            "SOT": {
+                full: "Security Operations & Technologies",
+                domain: "SV5 Domain",
+                desc: "Операционно-технологический домен экосистемы Security Vision 5: включает модули IRP/SOAR 2.0, NG SOAR, SIEM, EDR, AM (Asset Management), VS/VM, SPC и шлюзы ГосСОПКА / FinCERT / NCSC.",
+                url: "https://en.wikipedia.org/wiki/Security_operations_center",
+                sourceTitle: "Wikipedia: Security Operations"
+            },
+            "SDA": {
+                full: "Security Data Analytics",
+                domain: "SV5 Domain",
+                desc: "Аналитический домен платформы Security Vision 5: объединяет платформу киберразведки (TIP), поведенческий анализ пользователей и сущностей (UEBA), детекцию аномалий (AD) и модели машинного обучения (ML/LLM).",
+                url: "https://en.wikipedia.org/wiki/User_and_entity_behavior_analytics",
+                sourceTitle: "Wikipedia: Security Behavior Analytics"
+            },
+            "SGRC": {
+                full: "Security Governance, Risk, and Compliance",
+                domain: "SV5 Domain",
+                desc: "Управленческо-регуляторный домен Security Vision 5: модули КИИ, CM (Compliance), ПДн, SA (Self-Assessment), BCM (непрерывность бизнеса), RM/ORM (управление рисками), ASOC и OTS (защита АСУ ТП).",
+                url: "https://en.wikipedia.org/wiki/Governance,_risk_management,_and_compliance",
+                sourceTitle: "Wikipedia: GRC Architecture"
+            },
+            "SOAR": {
+                full: "Security Orchestration, Automation and Response",
+                domain: "SOT Module",
+                desc: "Класс систем оркестрации СЗИ и автоматизации реагирования по динамическим плейбукам. В Security Vision 5 включает более 150 атомарных действий и 150+ готовых коннекторов (Решение 1907/QĐ-BTTTT).",
+                url: "https://en.wikipedia.org/wiki/Security_orchestration",
+                sourceTitle: "Wikipedia: Security Orchestration (SOAR)"
+            },
+            "NG SOAR": {
+                full: "Next-Generation SOAR (Конвергентное ядро)",
+                domain: "SOT Module",
+                desc: "Конвергентная платформа Security Vision, объединяющая в едином ядре оркестрацию инцидентов (SOAR), базовую корреляцию (1000+ правил SIEM), сканер уязвимостей (VS) и учет активов (AM).",
+                url: "https://en.wikipedia.org/wiki/Security_orchestration",
+                sourceTitle: "Wikipedia: Next-Gen Security Orchestration"
+            },
+            "IRP": {
+                full: "Incident Response Platform",
+                domain: "SOT Module",
+                desc: "Платформа управления жизненным циклом расследования инцидентов по 7 фазам NIST SP 800-61 с автоматическим построением графа атаки (Kill Chain) и контролем SLA.",
+                url: "https://en.wikipedia.org/wiki/Computer_security_incident_management",
+                sourceTitle: "Wikipedia: Incident Response Management"
+            },
+            "SIEM": {
+                full: "Security Information and Event Management",
+                domain: "SOT Module",
+                desc: "Система потокового сбора, парсинга, нормализации и корреляции событий ИБ в реальном времени от 4 базовых классов источников (Решение 1127/QĐ-BTTTT и 1356/QĐ-BTTTT).",
+                url: "https://en.wikipedia.org/wiki/Security_information_and_event_management",
+                sourceTitle: "Wikipedia: SIEM"
+            },
+            "EDR": {
+                full: "Endpoint Detection and Response",
+                domain: "SOT Module",
+                desc: "Агентская система проактивного мониторинга и блокировки угроз на хостах Windows/Linux. Выполняет локальную корреляцию по 800+ правилам MITRE ATT&CK автономно даже при обрыве связи с ЦОД (Решение 764/QĐ-BTTTT).",
+                url: "https://en.wikipedia.org/wiki/Endpoint_detection_and_response",
+                sourceTitle: "Wikipedia: Endpoint Detection and Response"
+            },
+            "AM": {
+                full: "Asset Management / CMDB",
+                domain: "SOT Module",
+                desc: "Модуль непрерывной инвентаризации и построения ресурсно-сервисной модели активов (до 300 000 хостов). Основа категорирования систем по 5 уровням Декрета 85/2016/NĐ-CP.",
+                url: "https://en.wikipedia.org/wiki/IT_asset_management",
+                sourceTitle: "Wikipedia: IT Asset Management"
+            },
+            "VM": {
+                full: "Vulnerability Management",
+                domain: "SOT Module",
+                desc: "Система управления уязвимостями: приоритизация дефектов по метрикам CVSS v3.1 + EPSS, оркестрация автопатчинга с точками отката и верификация устранения (обязательна с Уровня 3 по TCVN 11930:2017).",
+                url: "https://en.wikipedia.org/wiki/Vulnerability_management",
+                sourceTitle: "Wikipedia: Vulnerability Management"
+            },
+            "VS": {
+                full: "Vulnerability Scanner",
+                domain: "SOT Module",
+                desc: "Встроенный высокоскоростной сканер уязвимостей Security Vision: полный аудит хоста за 3–10 секунд, ретроградное сканирование по новым CVE/IoC за 1–2 секунды.",
+                url: "https://en.wikipedia.org/wiki/Vulnerability_scanner",
+                sourceTitle: "Wikipedia: Vulnerability Scanner"
+            },
+            "SPC": {
+                full: "Security Profile Compliance",
+                domain: "SOT Module",
+                desc: "Модуль непрерывного контроля параметров харденинга ОС (RHEL, AlmaLinux, Astra Linux, Windows) и СУБД по стандартам TCVN 11930:2017 п. 5.2.2 и CIS Benchmarks.",
+                url: "https://en.wikipedia.org/wiki/System_hardening",
+                sourceTitle: "Wikipedia: System Hardening & Compliance"
+            },
+            "TIP": {
+                full: "Threat Intelligence Platform",
+                domain: "SDA Module",
+                desc: "Платформа киберразведки: агрегация 30+ коммерческих и государственных фидов (STIX/TAXII, MISP), дедупликация IoC и автоматический ретроспективный поиск (Retro-match) в исторических логах.",
+                url: "https://en.wikipedia.org/wiki/Threat_intelligence_platform",
+                sourceTitle: "Wikipedia: Threat Intelligence Platform"
+            },
+            "UEBA": {
+                full: "User and Entity Behavior Analytics",
+                domain: "SDA Module",
+                desc: "Система поведенческого анализа пользователей и сущностей на базе машинного обучения без учителя. Выявляет скомпрометированные учетные записи, инсайдеров и аномалии за пределами сигнатур.",
+                url: "https://en.wikipedia.org/wiki/User_and_entity_behavior_analytics",
+                sourceTitle: "Wikipedia: UEBA"
+            },
+            "IOC": {
+                full: "Indicators of Compromise (Индикаторы компрометации)",
+                domain: "Threat Intel",
+                desc: "Криминалистические артефакты взлома: хэши файлов (SHA-256), IP-адреса, домены C2, ключи реестра, мьютексы и TTPs по Пирамиде боли Дэвида Бьянко.",
+                url: "https://en.wikipedia.org/wiki/Indicator_of_compromise",
+                sourceTitle: "Wikipedia: Indicator of Compromise"
+            },
+            "MITRE ATT&CK": {
+                full: "Adversarial Tactics, Techniques, and Common Knowledge",
+                domain: "Framework",
+                desc: "Матрица тактик и техник киберзлоумышленников. Движок Security Vision IRP/SOAR 2.0 автоматически классифицирует более 250 типов инцидентов по 110+ техникам MITRE ATT&CK.",
+                url: "https://attack.mitre.org/",
+                sourceTitle: "MITRE ATT&CK Official Matrix"
+            },
+            "Sigma": {
+                full: "Sigma Generic Signature Format for SIEM Systems",
+                domain: "Detection",
+                desc: "Универсальный открытый формат описания правил детектирования по логам, используемый в Security Vision IRP/SOAR 2.0 для ретроспективного анализа окрестности инцидента (Incident Vicinity).",
+                url: "https://en.wikipedia.org/wiki/Sigma_(signature_format)",
+                sourceTitle: "Wikipedia: Sigma Signature Format"
+            },
+            "Kill Chain": {
+                full: "Cyber Kill Chain / Граф цепочки атаки",
+                domain: "DFIR & SOAR",
+                desc: "Визуальный граф расследования (Count Incident Investigation) в Security Vision 5, связывающий хосты, учетные записи, процессы LOLBIN, уязвимости и внешние C2-узлы с запуском команд блокировки прямо с графа.",
+                url: "https://en.wikipedia.org/wiki/Kill_chain",
+                sourceTitle: "Wikipedia: Kill Chain"
+            },
+            "Lateral Movement": {
+                full: "Горизонтальное перемещение нарушителя внутри сети",
+                domain: "Attack Phase",
+                desc: "Продвижение атакующего по внутренней сети через Pass-the-Hash, дамп памяти LSASS/SAM, SMB (445), WMI/WinRM и RDP. Детектируется связкой EDR + NTA + событиями Windows 4624 (тип 3/10), 5140, 5145.",
+                url: "https://en.wikipedia.org/wiki/Network_lateral_movement",
+                sourceTitle: "Wikipedia: Network Lateral Movement"
+            },
+            "HITL": {
+                full: "Human-in-the-Loop (Ручное подтверждение блокировки)",
+                domain: "SOAR Policy",
+                desc: "Механизм защиты от Self-Inflicted DoS (отказа в обслуживании собственными руками): перед изоляцией критических активов (Crown Jewels, контроллеров домена, порталов e-Gov 24/7) SOAR запрашивает подтверждение дежурного аналитика.",
+                url: "https://en.wikipedia.org/wiki/Human-in-the-loop",
+                sourceTitle: "Wikipedia: Human-in-the-loop"
+            },
+            "CVSS": {
+                full: "Common Vulnerability Scoring System v3.1 + EPSS",
+                domain: "Vulnerability Mgmt",
+                desc: "Связка статической оценки тяжести уязвимости CVSS (0–10) и вероятностной ML-модели EPSS (вероятность реальной эксплуатации в ближайшие 30 дней). При CVSS ≥ 7.0 и EPSS ≥ 10% требуется экстренный патчинг за 24–48ч.",
+                url: "https://en.wikipedia.org/wiki/Common_Vulnerability_Scoring_System",
+                sourceTitle: "Wikipedia: CVSS Standard"
+            },
+            "KRaft": {
+                full: "Apache Kafka Raft Metadata Mode (KIP-500)",
+                domain: "Data Pipeline",
+                desc: "Встроенный протокол консенсуса Raft в Apache Kafka (топик __cluster_metadata), заменивший ZooKeeper. Обеспечивает кворум большинства ⌊N/2⌋+1 (3 или 5 узлов), защиту от Split-Brain и выбор лидера менее чем за 1 секунду.",
+                url: "https://en.wikipedia.org/wiki/Apache_Kafka",
+                sourceTitle: "Wikipedia: Apache Kafka & KRaft"
+            },
+            "Vector": {
+                full: "Vector High-Performance Observability Pipelines",
+                domain: "Data Pipeline",
+                desc: "Высокопроизводительный stateless-парсер и нормализатор сырых логов (1 ядро vCPU на 1500–2500 EPS). Формирует крупные пачки (batch.max_events = 100 000) для пакетной вставки в ClickHouse.",
+                url: "https://en.wikipedia.org/wiki/Log_management",
+                sourceTitle: "Wikipedia: Log Management Pipelines"
+            },
+            "ClickHouse": {
+                full: "ClickHouse Columnar OLAP DBMS + ClickHouse Keeper",
+                domain: "Analytics DB",
+                desc: "Колоночная СУБД для хранения сотен тысяч EPS со сжатием ZSTD (5–8x) и ключом ORDER BY (tenant_id, category, timestamp). Координатор ClickHouse Keeper обязательно выносится на 3 отдельных сервера с NVMe.",
+                url: "https://clickhouse.com/docs",
+                sourceTitle: "ClickHouse Official Documentation"
+            },
+            "OpenSearch": {
+                full: "OpenSearch Distributed Inverted-Index Engine",
+                domain: "Search Engine",
+                desc: "Поисковый движок с инвертированным индексом (JVM Heap ≤ 31 ГБ для сохранения Compressed OOPs), применяемый в стеке Security Vision для быстрого полнотекстового поиска по неструктурированным артефактам.",
+                url: "https://en.wikipedia.org/wiki/OpenSearch_(software)",
+                sourceTitle: "Wikipedia: OpenSearch"
+            },
+            "PostgreSQL": {
+                full: "PostgreSQL 14/16 HA / Postgres Pro (HTAP Master DB)",
+                domain: "Transactional DB",
+                desc: "Транзакционное ACID-ядро Security Vision 5. Для 300 000 узлов разворачивается на 2×12 ядрах CPU (HT Off), 64 ГБ RAM, 1 ТБ SSD RAID 1 + 4 ТБ HDD RAID 6 под управлением стека Patroni + etcd + PgBouncer.",
+                url: "https://en.wikipedia.org/wiki/PostgreSQL",
+                sourceTitle: "Wikipedia: PostgreSQL"
+            },
+            "Patroni": {
+                full: "Patroni High-Availability Orchestrator + etcd + PgBouncer",
+                domain: "Database HA",
+                desc: "Стек автоматического управления отказоустойчивостью PostgreSQL с консенсус-хранилищем etcd, аппаратным таймером Linux Watchdog и пулером транзакций PgBouncer.",
+                url: "https://patroni.readthedocs.io/",
+                sourceTitle: "Patroni Official Documentation"
+            },
+            "Split-Brain": {
+                full: "Состояние раскола распределенного кластера (Split-Brain)",
+                domain: "HA Consensus",
+                desc: "Аварийная ситуация при разрыве сети между узлами кластера. Предотвращается математическим кворумом большинства ⌊N/2⌋+1 в алгоритме Raft (нечетное число узлов: 3 или 5) и аппаратным Watchdog.",
+                url: "https://en.wikipedia.org/wiki/Split-brain_(computing)",
+                sourceTitle: "Wikipedia: Split-Brain Computing"
+            },
+            "TAP": {
+                full: "Optical Network Test Access Point (Пассивный ответвитель)",
+                domain: "Network Capture",
+                desc: "Физический расщепитель световой волны в оптоволокне (50/50 или 70/30). В отличие от программного SPAN-порта коммутатора гарантирует 0% потерь пакетов при 100G перегрузках и передает битые кадры (CRC).",
+                url: "https://en.wikipedia.org/wiki/Network_tap",
+                sourceTitle: "Wikipedia: Network TAP"
+            },
+            "NPB": {
+                full: "Network Packet Broker (Брокер сетевых пакетов)",
+                domain: "Network Capture",
+                desc: "Аппаратный комплекс между оптическими TAP и сенсорами NTA/NIDS: выполняет аппаратную дедупликацию кадров, отсечение полезной нагрузки L7 (Packet Slicing, экономия до 80%) и балансировку сессий по 5-tuple хэшу.",
+                url: "https://en.wikipedia.org/wiki/Network_packet_broker",
+                sourceTitle: "Wikipedia: Network Packet Broker"
+            },
+            "NTA": {
+                full: "Network Traffic Analysis / Network Detection and Response (NDR)",
+                domain: "Network Security",
+                desc: "Сенсоры глубокого анализа сетевого трафика на выделенных серверах Bare-Metal. Выявляют скрытые C2-туннели, сканирование портов SMB/RDP и эксфильтрацию данных.",
+                url: "https://en.wikipedia.org/wiki/Network_traffic_analysis",
+                sourceTitle: "Wikipedia: Network Traffic Analysis"
+            },
+            "NGFW": {
+                full: "Next-Generation Firewall (Межсетевой экран нового поколения)",
+                domain: "Network Security",
+                desc: "Кластер пограничной и межзонной фильтрации ЦОД SOC. Осуществляет терминацию VPN от тенантов и мгновенную блокировку атакующих IP по командам REST API из оркестратора SOAR.",
+                url: "https://en.wikipedia.org/wiki/Next-generation_firewall",
+                sourceTitle: "Wikipedia: Next-Generation Firewall"
+            },
+            "NIPS": {
+                full: "Network Intrusion Prevention System",
+                domain: "Network Security",
+                desc: "Система активного предотвращения сетевых вторжений, обязательная в базовом стеке SOC по п. 1.1 Решения 1356/QĐ-BTTTT (технический стандарт 1591/QĐ-BTTTT).",
+                url: "https://en.wikipedia.org/wiki/Intrusion_prevention_system",
+                sourceTitle: "Wikipedia: Intrusion Prevention System"
+            },
+            "WAF": {
+                full: "Web Application Firewall / Tường lửa ứng dụng web",
+                domain: "App Security",
+                desc: "Межсетевой экран уровня веб-приложений в DMZ. Обязателен для всех систем Уровня 2 и выше по Декрету 85/2016/NĐ-CP и для аккредитации SOC по Решению 1356/QĐ-BTTTT (стандарт 1126/QĐ-BTTTT).",
+                url: "https://en.wikipedia.org/wiki/Web_application_firewall",
+                sourceTitle: "Wikipedia: Web Application Firewall"
+            },
+            "RELP": {
+                full: "Reliable Event Logging Protocol (TCP 20514)",
+                domain: "Ingest Protocol",
+                desc: "Протокол гарантированной доставки журналов событий с квитированием (ACK) на прикладном уровне. Полностью исключает потерю и дублирование логов при обрывах WAN-связи между филиалами и ЦОД.",
+                url: "https://en.wikipedia.org/wiki/Reliable_Event_Logging_Protocol",
+                sourceTitle: "Wikipedia: RELP Protocol"
+            },
+            "Syslog": {
+                full: "Syslog Protocol RFC 5424 (Octet Counting Framing)",
+                domain: "Ingest Protocol",
+                desc: "Стандарт передачи событий по TCP/TLS 6514. Применение фрейминга с подсчетом октетов (Octet Counting по RFC 5424) предотвращает разбиение многострочных дампов Java и XML-логов Windows.",
+                url: "https://datatracker.ietf.org/doc/html/rfc5424",
+                sourceTitle: "IETF RFC 5424 Specification"
+            },
+            "WEF": {
+                full: "Windows Event Forwarding / Collector (TCP 5985 / 5986)",
+                domain: "Ingest Protocol",
+                desc: "Безагентный транзакционный сбор журналов безопасности Windows (Security Event Log) по протоколу HTTP/HTTPS с взаимной Kerberos или TLS-аутентификацией.",
+                url: "https://en.wikipedia.org/wiki/Event_Viewer",
+                sourceTitle: "Wikipedia: Windows Event Log Architecture"
+            },
+            "NetFlow": {
+                full: "NetFlow / IPFIX / sFlow Network Telemetry (UDP 2055, 4739)",
+                domain: "Ingest Protocol",
+                desc: "Статистическая телеметрия сетевых потоков от маршрутизаторов и коммутаторов фабрики Spine-Leaf для контроля объемов трафика в UEBA и SIEM.",
+                url: "https://en.wikipedia.org/wiki/NetFlow",
+                sourceTitle: "Wikipedia: NetFlow Telemetry"
+            },
+            "Ring Buffer": {
+                full: "NIC Hardware RX/TX Ring Buffer & Linux Kernel Sysctl Tuning",
+                domain: "Linux Kernel",
+                desc: "Кольцевой буфер сетевой карты (увеличивается через ethtool -G eth0 rx 4096) и системные буферы сокетов ядра (net.core.rmem_max = 64MB, netdev_max_backlog = 100000) для предотвращения сброса пакетов.",
+                url: "https://en.wikipedia.org/wiki/Circular_buffer",
+                sourceTitle: "Wikipedia: Ring Buffer DMA"
+            },
+            "ILM": {
+                full: "Information Lifecycle Management (Hot / Warm / Cold Tiering)",
+                domain: "Storage Tiering",
+                desc: "Трехуровневое хранение телеметрии: Hot Tier (1–14 сут, NVMe RAID 10, отклик < 0.5 с), Warm Tier (15–90 сут, SAS/HDD RAID 50/60) и Cold Tier (91–365+ сут, объектное хранилище S3 Ceph/MinIO).",
+                url: "https://en.wikipedia.org/wiki/Information_lifecycle_management",
+                sourceTitle: "Wikipedia: Information Lifecycle Management"
+            },
+            "TCVN 11930:2017": {
+                full: "Tiêu chuẩn quốc gia TCVN 11930:2017 & Циркуляр 12/2022/TT-BTTTT",
+                domain: "Стандарт СРВ",
+                desc: "Национальный стандарт Вьетнама (гармонизирован с ISO/IEC 27001 и NIST SP 800-53 Rev.4), определяющий базовые требования к 5 уровням защищенности ИС и обязательное разделение ЦОД на 7 сетевых зон.",
+                url: "https://thuvienphapluat.vn/TCVN/Dien-dien-tu/TCVN-11930-2017-Cong-nghe-thong-tin-Yeu-cau-co-ban-an-toan-he-thong-thong-tin-916781.aspx",
+                sourceTitle: "Thư Viện Pháp Luật: TCVN 11930:2017"
+            },
+            "NCSC": {
+                full: "National Cyber Security Center (Trung tâm Giám sát ATTT quốc gia)",
+                domain: "Регулятор СРВ",
+                desc: "Национальный центр мониторинга кибербезопасности Вьетнама (при AIS/MIC). Головной узел Слоя 4 Модели «4 слоев», принимающий непрерывный поток телеметрии и статистики ВПО от всех аккредитованных SOC.",
+                url: "https://khonggianmang.vn/",
+                sourceTitle: "Официальный портал NCSC Вьетнама"
+            },
+            "VNCERT/CC": {
+                full: "Vietnam Computer Emergency Response Team (Решение 05/2017/QĐ-TTg)",
+                domain: "Регулятор СРВ",
+                desc: "Национальный координационный центр реагирования на компьютерные инциденты СРВ. Требует подачи полного отчета об инциденте не позднее 5 дней (или немедленного экстренного отчета при серьезном сбое).",
+                url: "https://vncert.gov.vn/",
+                sourceTitle: "Официальный портал VNCERT/CC"
+            },
+            "A05 MPS": {
+                full: "Департамент кибербезопасности A05 МОБ СРВ (Декрет 13/2023/NĐ-CP)",
+                domain: "Регулятор СРВ",
+                desc: "Профильный департамент Министерства общественной безопасности Вьетнама (Bộ Công an). При утечке персональных данных оператор обязан подать уведомление по Форме № 03 в A05 строго в течение 72 часов.",
+                url: "https://bocongan.gov.vn/",
+                sourceTitle: "Портал Министерства общественной безопасности СРВ"
+            },
+            "ГосСОПКА": {
+                full: "Государственная система обнаружения, предупреждения и ликвидации последствий компьютерных атак (НКЦКИ)",
+                domain: "Регулятор РФ",
+                desc: "Штатный модуль Security Vision для автоматического двустороннего обмена карточками компьютерных инцидентов и бюллетенями угроз с НКЦКИ (187-ФЗ о безопасности КИИ).",
+                url: "https://en.wikipedia.org/wiki/Computer_emergency_response_team",
+                sourceTitle: "Wikipedia: National CERT Architecture"
+            },
+            "FinCERT": {
+                full: "ФинЦЕРТ Банка России / Финансовый CERT Госбанка (SBV)",
+                domain: "Финансовый регулятор",
+                desc: "Модуль автоматизированного информационного обмена о финансовых кибератаках, вредоносных переводах и индикаторах компрометации с центральным банком.",
+                url: "https://en.wikipedia.org/wiki/Computer_emergency_response_team",
+                sourceTitle: "Wikipedia: Financial CERT"
+            },
+            "DMZ": {
+                full: "Demilitarized Zone (Демилитаризованная зона приема и коннекторов)",
+                domain: "Network Zone",
+                desc: "Буферная сетевая зона (Зона 2 по TCVN 11930:2017), в которую выносятся WAF, коллекторы телеметрии и Dedicated Connector Service для полного запрета прямых входящих TCP-сессий в ядро SOC.",
+                url: "https://en.wikipedia.org/wiki/DMZ_(computing)",
+                sourceTitle: "Wikipedia: DMZ Network Architecture"
+            },
+            "OOB": {
+                full: "Out-of-Band Management (Зона 6 управления системными устройствами)",
+                domain: "Network Zone",
+                desc: "Физически изолированная сеть управления (обязательна для Уровней 4–5 по TCVN 11930:2017) для доступа к портам IPMI/iDRAC/iLO, коммутаторам и серверам бэкапа через шлюз PAM.",
+                url: "https://en.wikipedia.org/wiki/Out-of-band_management",
+                sourceTitle: "Wikipedia: Out-of-Band Management"
+            },
+            "PAM": {
+                full: "Privileged Access Management (Бастион привилегированного доступа)",
+                domain: "Access Control",
+                desc: "Шлюз контроля и видеозаписи привилегированных сессий SSH/RDP системных администраторов и аналитиков SOC с обязательной проверкой MFA и запретом прямого входа root.",
+                url: "https://en.wikipedia.org/wiki/Privileged_access_management",
+                sourceTitle: "Wikipedia: Privileged Access Management"
+            },
+            "MFA": {
+                full: "Multi-Factor Authentication (Многофакторная аутентификация)",
+                domain: "Access Control",
+                desc: "Обязательное требование п. 3.40 TCVN 11930:2017 (для систем Уровня 3 и выше) при входе аналитиков в консоль SOC, личные кабинеты тенантов и бастионы управления.",
+                url: "https://en.wikipedia.org/wiki/Multi-factor_authentication",
+                sourceTitle: "Wikipedia: Multi-Factor Authentication"
+            },
+            "RBAC": {
+                full: "Role-Based Access Control (Ролевая модель разграничения доступа)",
+                domain: "Access Control",
+                desc: "Гранулированное разграничение прав доступа до уровня отдельных полей карточек и строгая изоляция данных различных министерств/тенантов по идентификатору Tenant_ID.",
+                url: "https://en.wikipedia.org/wiki/Role-based_access_control",
+                sourceTitle: "Wikipedia: Role-Based Access Control"
+            },
+            "No-Code": {
+                full: "Low-Code / No-Code Параметрическая Архитектура (6 Конструкторов)",
+                domain: "SV5 Core",
+                desc: "Возможность создания новых карточек, плейбуков, коннекторов, отчетов и дашбордов через GUI без перекомпиляции ядра (доказательство владения решением по п. 2.2 Решения 1356/QĐ-BTTTT).",
+                url: "https://en.wikipedia.org/wiki/No-code_development_platform",
+                sourceTitle: "Wikipedia: No-Code Development Platform"
+            },
+            "EPS": {
+                full: "Events Per Second (Событий безопасности в секунду)",
+                domain: "Sizing Metric",
+                desc: "Базовая метрика расчета пропускной способности сети, числа ядер парсинга Vector, брокеров Kafka, дисков ClickHouse и лицензирования SIEM.",
+                url: "https://en.wikipedia.org/wiki/Events_per_second",
+                sourceTitle: "Wikipedia: Events Per Second"
+            },
+            "MTTA / MTTD / MTTR": {
+                full: "Mean Time to Acknowledge / Detect / Respond (Ключевые метрики SLA)",
+                domain: "SOC SLA/KPI",
+                desc: "Целевые нормативы смены SOC: MTTA (взятие алерта в работу L1) ≤ 10 мин, эскалация на L2 ≤ 15 мин, MTTD (обнаружение) ≤ 30 мин, MTTR (локализация угрозы) ≤ 60 мин.",
+                url: "https://en.wikipedia.org/wiki/Mean_time_to_recovery",
+                sourceTitle: "Wikipedia: MTTR & Incident Metrics"
+            },
+            "BCM": {
+                full: "Business Continuity Management & Geo-DR (30+ км для Уровня 5)",
+                domain: "SGRC Module",
+                desc: "Модуль непрерывности бизнеса и планов аварийного восстановления (DRP). Для систем Уровня 5 по Декрету 85/2016/NĐ-CP обязателен георезервный ЦОД на расстоянии минимум 30 км.",
+                url: "https://en.wikipedia.org/wiki/Business_continuity_planning",
+                sourceTitle: "Wikipedia: Business Continuity Planning"
+            },
+            "OTS": {
+                full: "Operational Technology Security (Защита АСУ ТП / ICS / SCADA)",
+                domain: "SGRC Module",
+                desc: "Модуль защиты промышленных систем управления (п. 5 ст. 3 Циркуляра 12/2022/TT-BTTTT) со сбором телеметрии через однонаправленные аппаратные диоды данных.",
+                url: "https://en.wikipedia.org/wiki/Operational_technology",
+                sourceTitle: "Wikipedia: Operational Technology Security"
+            },
+            "REST API": {
+                full: "Representational State Transfer API / Webhook / JSON-RPC",
+                domain: "Integration",
+                desc: "Основной программный интерфейс взаимодействия выделенного сервиса коннекторов Security Vision с внешними СЗИ, облачными песочницами и шлюзами регуляторов по HTTPS (TCP 443).",
+                url: "https://en.wikipedia.org/wiki/REST",
+                sourceTitle: "Wikipedia: REST API Architecture"
+            },
+            "LDAPS": {
+                full: "Lightweight Directory Access Protocol over TLS (TCP 636)",
+                domain: "Integration",
+                desc: "Защищенный протокол взаимодействия сервиса коннекторов SOAR со службами каталогов Active Directory и FreeIPA для мгновенной блокировки скомпрометированных учетных записей.",
+                url: "https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol",
+                sourceTitle: "Wikipedia: LDAP over TLS"
+            },
+            "WMI / WinRM": {
+                full: "Windows Management Instrumentation / Windows Remote Management",
+                domain: "Integration",
+                desc: "Протоколы безагентного опроса, инвентаризации активов (AM), сканирования уязвимостей (VS) и выполнения команд реагирования на хостах Windows (порты TCP 135, 445, 5985, 5986).",
+                url: "https://en.wikipedia.org/wiki/Windows_Remote_Management",
+                sourceTitle: "Wikipedia: Windows Remote Management"
+            },
+            "LLM": {
+                full: "On-Premises & Obfuscated Cloud Large Language Models",
+                domain: "AI Assistants",
+                desc: "ИИ-ассистенты аналитиков SOC в Security Vision 5: локальные On-Premise LLM (для полной изоляции данных КИИ и министерств) или облачные модели с автоматической обфускацией IP и имен пользователей.",
+                url: "https://en.wikipedia.org/wiki/Large_language_model",
+                sourceTitle: "Wikipedia: Large Language Models"
+            }
+        };
+
+        // =========================================================================================
+        // 2. СТРУКТУРА 7 СЕТЕВЫХ ЗОН ЦОД ПО СТАНДАРТУ TCVN 11930:2017 (С ВЫДЕЛЕННЫМИ КОРИДОРАМИ)
+        // =========================================================================================
+        const DIAGRAM_W = 2400;
+        const DIAGRAM_H = 2100;
+
+        const UML_ZONES = [
+            {
+                id: "z_ext",
+                shortName: "Внешний контур & Зона 7",
+                code: "ВНЕШНИЙ КОНТУР & ЗОНА 7 (ISOLATED WI-FI)",
+                title: "Клиентские периметры (Тенанты MSSP), Государственные регуляторы (NCSC / ГосСОПКА) и Изолированная Wi-Fi зона",
+                standard: "Модель «4 слоев» (Директива 14/CT-TTg) • Решение 1356/QĐ-BTTTT • 187-ФЗ КИИ • Зона 7 (VLAN Wi-Fi)",
+                x: 30, y: 30, w: 2340, h: 300,
+                stroke: "#38bdf8", fill: "rgba(14, 116, 144, 0.08)"
+            },
+            {
+                id: "z_edge",
+                shortName: "Зона 1: Пограничная (Edge & TAP)",
+                code: "ЗОНА 1: ПОГРАНИЧНАЯ СЕТЬ (OUTSIDE / EDGE NETWORK ZONE) + СЪЕМ ТРАФИКА",
+                title: "Защита периметра ЦОД, Терминация госсетей, Оптический съем трафика TAP и Брокеры пакетов NPB",
+                standard: "TCVN 11930:2017 п. 5.2.1.2 (Уровень 1–5) • Решение 1591/QĐ-BTTTT (NIPS)",
+                x: 30, y: 426, w: 2340, h: 280,
+                stroke: "#06b6d4", fill: "rgba(6, 182, 212, 0.07)"
+            },
+            {
+                id: "z_dmz",
+                shortName: "Зона 2: Ingest DMZ & Коннекторы",
+                code: "ЗОНА 2: ДЕМИЛИТАРИЗОВАННАЯ ЗОНА ПРИЕМА И ВЫНЕСЕННЫХ КОННЕКТОРОВ (INGEST DMZ)",
+                title: "WAF + Reverse Proxy, Прием телеметрии (Syslog/RELP/WEF), Диоды данных АСУ ТП и Dedicated Connector Service",
+                standard: "TCVN 11930:2017 (Уровень 1–5) • Исключение прямых входящих TCP-сессий в ядро SOC",
+                x: 30, y: 816, w: 2340, h: 284,
+                stroke: "#f59e0b", fill: "rgba(245, 158, 11, 0.07)"
+            },
+            {
+                id: "z_srv",
+                shortName: "Зона 3: Ядро SV5 & Конвейер Kafka",
+                code: "ЗОНА 3: ВНУТРЕННЯЯ СЕРВЕРНАЯ ЗОНА & КОНВЕЙЕР ТЕЛЕМЕТРИИ (INTERNAL SERVER & PIPELINE ZONE)",
+                title: "Буфер Apache Kafka (KRaft), Нормализация Vector, Ядро Security Vision 5 (SOT / SDA / SGRC) и локальные LLM",
+                standard: "TCVN 11930:2017 (Обязательна с Уровня 2+) • Режим полной отказоустойчивости для MSSP",
+                x: 30, y: 1206, w: 2340, h: 384,
+                stroke: "#10b981", fill: "rgba(16, 185, 129, 0.07)"
+            },
+            {
+                id: "z_db",
+                shortName: "Зона 4: Базы данных (ClickHouse & PG)",
+                code: "ЗОНА 4: БАЗЫ ДАННЫХ И ХРАНЕНИЕ (DATABASE & STORAGE ZONE)",
+                title: "Кластер координации ClickHouse Keeper (Raft), Шарды ClickHouse (Hot/Warm), PostgreSQL HA (Patroni) и Cold S3",
+                standard: "TCVN 11930:2017 (Уровень 3+) • Георезерв 30+ км (Уровень 5)",
+                x: 30, y: 1700, w: 1450, h: 370,
+                stroke: "#f43f5e", fill: "rgba(244, 63, 94, 0.07)"
+            },
+            {
+                id: "z_admin",
+                shortName: "Зона 5: Админ-зона смены SOC",
+                code: "ЗОНА 5: АДМИН-ЗОНА СМЕНЫ SOC (ADMIN ZONE)",
+                title: "АРМ Аналитиков L1 / L2 / L3, DFIR, SOC Manager и Видеостена",
+                standard: "Решение 1356/QĐ-BTTTT (12+ спец., MFA)",
+                x: 1495, y: 1700, w: 425, h: 370,
+                stroke: "#8b5cf6", fill: "rgba(139, 92, 246, 0.08)"
+            },
+            {
+                id: "z_oob",
+                shortName: "Зона 6: Управление OOB & PAM",
+                code: "ЗОНА 6: УПРАВЛЕНИЕ OOB (DEVICE MGMT ZONE)",
+                title: "Шлюз PAM, IPMI/iDRAC/iLO, Эталон NTP (UTC+7), Zabbix и Backup",
+                standard: "TCVN 11930:2017 (Уровень 4–5 • Изоляция)",
+                x: 1935, y: 1700, w: 435, h: 370,
+                stroke: "#a855f7", fill: "rgba(168, 85, 247, 0.08)"
+            }
+        ];
+
+        // =========================================================================================
+        // 3. УЗЛЫ И КОМПОНЕНТЫ UML-ДИАГРАММЫ (18 КОМПОНЕНТОВ)
+        // =========================================================================================
+        const UML_NODES = [
+            {
+                id: "n_sources",
+                zone: "z_ext",
+                stereotype: "«external telemetry sources»",
+                title: "4 Класса источников тенантов",
+                subtitle: "Решение 1356/QĐ-BTTTT п. 2.1.1.1",
+                x: 50, y: 108, w: 430, h: 202,
+                color: "#38bdf8",
+                abbrs: ["Syslog", "WEF", "NetFlow", "SIEM"],
+                specs: [
+                    "1. Сеть: Router, Switch (Spine-Leaf)",
+                    "2. ИБ: NGFW, NIDS/NIPS, WAF, AV Server",
+                    "3. ОС: Linux (RHEL/Alma/Astra), Windows",
+                    "4. Сервисы: Web, Mail, DNS, DHCP, СУБД",
+                    "Схема: Изоляция по Tenant_ID (RFC 1918)"
+                ],
+                details: "Согласно п. 2.1.1.1 Решения 1356/QĐ-BTTTT и архитектуре корпоративного SOC, платформа обязана непрерывно принимать и анализировать события от 4 базовых классов источников: сетевого оборудования, средств защиты, серверных ОС и прикладных служб (Web, Mail, DNS, DHCP)."
+            },
+            {
+                id: "n_edr_agents",
+                zone: "z_ext",
+                stereotype: "«autonomous endpoint agent»",
+                title: "Агенты Security Vision EDR",
+                subtitle: "Windows / Linux / macOS Hosts",
+                x: 500, y: 108, w: 430, h: 202,
+                color: "#fb7185",
+                abbrs: ["EDR", "MITRE ATT&CK", "Lateral Movement", "AM"],
+                specs: [
+                    "Локальная корреляция: 800+ правил на хосте",
+                    "Автономная работа при обрыве WAN-канала",
+                    "Защита от «шторма алертов» и шифровальщиков",
+                    "Контроль: дерево процессов, LSASS/SAM, сокеты",
+                    "Авто-реагирование: Kill Process, Изоляция"
+                ],
+                details: "Ключевая особенность Security Vision EDR — перенос корреляции (800+ правил по матрице MITRE ATT&CK) непосредственно на защищаемый хост. При атаке шифровальщика агент автономно изолирует сетевой стек узла и завершает вредоносные процессы за секунды даже при полной потере связи с ЦОД."
+            },
+            {
+                id: "n_tenant_dmz",
+                zone: "z_ext",
+                stereotype: "«tenant perimeter gateway»",
+                title: "DMZ Министерства / Клиента (Слой 1)",
+                subtitle: "Вынесенный шлюз в контуре Заказчика",
+                x: 950, y: 108, w: 440, h: 202,
+                color: "#38bdf8",
+                abbrs: ["MSSP", "DMZ", "LDAPS", "WMI / WinRM"],
+                specs: [
+                    "Локальный буферизирующий коллектор логов",
+                    "Вынесенный СВ Коннектор (8–12 vCPU, 24 ГБ RAM)",
+                    "Локальное исполнение команд IR в AD / NGFW",
+                    "Исключение пересечения подсетей 10.0.0.0/8",
+                    "Личный кабинет ИБ-офицера ведомства (Слой 1)"
+                ],
+                details: "При подключении государственных министерств (Уровень 4) прямые входящие TCP-сессии извне запрещены. В DMZ самого министерства разворачивается локальный сервис коннекторов, который принимает команды блокировки из ядра SOC и исполняет их внутри периметра клиента."
+            },
+            {
+                id: "n_regulators",
+                zone: "z_ext",
+                stereotype: "«national & sector regulators»",
+                title: "Регуляторы: NCSC, VNCERT, A05, ГосСОПКА",
+                subtitle: "Слой 4 Модели «4 слоев» & 187-ФЗ / ЦБ",
+                x: 1410, y: 108, w: 450, h: 202,
+                color: "#34d399",
+                abbrs: ["NCSC", "VNCERT/CC", "A05 MPS", "ГосСОПКА", "FinCERT"],
+                specs: [
+                    "NCSC (AIS/MIC): непрерывный поток ВПО и логов",
+                    "VNCERT/CC (05/2017/QĐ-TTg): отчет ≤ 5 дней",
+                    "A05 MPS (Декрет 13/2023): утечки ПДн ≤ 72ч",
+                    "ГосСОПКА (НКЦКИ) и ФинЦЕРТ / Госбанк (SBV)",
+                    "Прием бюллетеней: alert.khonggianmang.vn"
+                ],
+                details: "Государственный контур двустороннего машинно-читаемого обмена. Автоматизирует выполнение Слоя 4 Модели «4 слоев» во Вьетнаме (NCSC, VNCERT/CC, Департамент A05 МОБ СРВ с жестким таймером 72 часа на уведомление об утечке ПДн) и требования НКЦКИ (ГосСОПКА) / ФинЦЕРТ."
+            },
+            {
+                id: "n_cloud_ti",
+                zone: "z_ext",
+                stereotype: "«external enrichment & zone 7»",
+                title: "Внешние TI-фиды + Зона 7 (Wi-Fi)",
+                subtitle: "30+ сервисов обогащения & Изоляция Wi-Fi",
+                x: 1880, y: 108, w: 470, h: 202,
+                color: "#a855f7",
+                abbrs: ["TIP", "IOC", "LLM", "TCVN 11930:2017"],
+                specs: [
+                    "TI: VirusTotal, AbuseIPDB, URLScan, Shodan",
+                    "Облачные LLM (только с обфускацией IP/УЗ!)",
+                    "Зона 7 (Wireless): полная VLAN и физ. изоляция",
+                    "Запрет маршрутизации Wi-Fi в серверные зоны",
+                    "Соответствие п. 5.2.1 TCVN 11930 (Уровень 2–5)"
+                ],
+                details: "Объединяет внешние источники обогащения киберразведки (более 30 коннекторов к VirusTotal, Shodan, AbuseIPDB) и обязательную по стандарту TCVN 11930:2017 (с Уровня 2) полностью изолированную Зону 7 беспроводных сетей, не имеющую пересечений с производственным контуром SOC."
+            },
+            {
+                id: "n_edge_fw",
+                zone: "z_edge",
+                stereotype: "«edge security cluster»",
+                title: "Anti-DDoS + Кластер NGFW / NIPS",
+                subtitle: "Терминация госсетей и VPN (Active-Active)",
+                x: 50, y: 504, w: 640, h: 182,
+                color: "#06b6d4",
+                abbrs: ["NGFW", "NIPS", "TCVN 11930:2017"],
+                specs: [
+                    "Терминация выделенной госсети (Mạng truyền số liệu chuyên dùng)",
+                    "Шифрованные туннели IPsec / TLS VPN от подключенных тенантов",
+                    "Встроенный модуль NIPS (сертификация 1591/QĐ-BTTTT)",
+                    "Запрет прямого внешнего управления (п. 5.2.1.2 TCVN 11930)",
+                    "Динамические черные списки (ACL) по командам оркестратора SOAR"
+                ],
+                details: "Первый рубеж обороны ЦОД SOC. Осуществляет очистку трафика от DDoS, терминирует шифрованные каналы от обслуживаемых министерств и блокирует любые обращения к неразрешенным портам. Интегрирован с SOAR по REST API для мгновенной блокировки атакующих IP и C2-серверов."
+            },
+            {
+                id: "n_tap_npb",
+                zone: "z_edge",
+                stereotype: "«lossless packet capture»",
+                title: "Оптические ответвители TAP + Брокер NPB",
+                subtitle: "Беспотерный съем трафика фабрики Spine-Leaf",
+                x: 870, y: 504, w: 660, h: 182,
+                color: "#3b82f6",
+                abbrs: ["TAP", "NPB", "NTA"],
+                specs: [
+                    "Оптический сплиттер TAP (50/50, 70/30): 0% потерь при пиках",
+                    "Передача полного дуплекса 10G/40G/100G и битых кадров (CRC)",
+                    "NPB Аппаратная дедупликация дублей пакетов с уровней Spine/Leaf",
+                    "NPB Packet Slicing: отсечение L7-нагрузки (экономия до 80%)",
+                    "NPB Session Balancing: 5-tuple хэш на пул сенсоров NTA/NIDS"
+                ],
+                details: "В отличие от программных SPAN-портов коммутаторов, которые сбрасывают кадры при перегрузке буферов ASIC, оптические ответвители TAP расщепляют световой поток физически. Брокер пакетов NPB удаляет дубликаты, отсекает тяжелый L7-пейлоад (исключая утечку ПДн) и балансирует сессии."
+            },
+            {
+                id: "n_nta_ids",
+                zone: "z_edge",
+                stereotype: "«bare-metal network sensors»",
+                title: "Сенсоры анализа трафика NTA / NDR & NIDS",
+                subtitle: "Выделенные серверы Bare-Metal (DPDK / AF_PACKET)",
+                x: 1710, y: 504, w: 640, h: 182,
+                color: "#06b6d4",
+                abbrs: ["NTA", "NIPS", "Lateral Movement", "IOC"],
+                specs: [
+                    "Развертывание строго на Bare-Metal без оверхеда гипервизора",
+                    "Детекция сканирования портов SMB (445), RPC (135), RDP (3389)",
+                    "Выявление скрытых C2-туннелей, DGA-доменов и эксфильтрации",
+                    "Генерация обогащенных сетевых метаданных и алертов в SIEM/SOAR"
+                ],
+                details: "Кластер высокопроизводительных сетевых сенсоров, анализирующий очищенный поток от брокера пакетов NPB. Вскрывает горизонтальное перемещение нарушителей (Lateral Movement), передачу файлов через административные шары (C$, ADMIN$) и сетевые эксплойты нулевого дня."
+            },
+            {
+                id: "n_waf_proxy",
+                zone: "z_dmz",
+                stereotype: "«application gateway»",
+                title: "Кластер WAF + Reverse Proxy (NGINX / IIS)",
+                subtitle: "Публикация портала клиентов и шлюзов API",
+                x: 50, y: 894, w: 560, h: 186,
+                color: "#f59e0b",
+                abbrs: ["WAF", "DMZ", "MFA", "REST API"],
+                specs: [
+                    "Сертификация WAF по Решению 1126/QĐ-BTTTT (Уровень 2+)",
+                    "Защита личных кабинетов тенантов (Co-managed SOC)",
+                    "Терминация TLS 1.3 (OpenSSL) и проверка сертификатов",
+                    "Защита от OWASP Top 10 и брутфорса учетных записей"
+                ],
+                details: "Обеспечивает защищенную публикацию клиентского веб-портала Security Vision для ИБ-офицеров обслуживаемых ведомств (Слой 1 в модели Co-managed SOC) и принимает внешние вебхуки по HTTPS."
+            },
+            {
+                id: "n_ingest_col",
+                zone: "z_dmz",
+                stereotype: "«high-throughput collectors»",
+                title: "Приемные коллекторы телеметрии + Тюнинг Linux",
+                subtitle: "Rsyslog / WEC / NetFlow + Аппаратный диод АСУ ТП",
+                x: 650, y: 894, w: 820, h: 186,
+                color: "#f59e0b",
+                abbrs: ["RELP", "Syslog", "WEF", "Ring Buffer", "OTS"],
+                specs: [
+                    "Прием: RELP (TCP 20514 ACK), Syslog TLS (6514 Octet Counting), WEF (5986)",
+                    "Тюнинг NIC: ethtool -G eth0 rx 4096 tx 4096 (защита от rx_missed_errors)",
+                    "Тюнинг ядра: net.core.rmem_max=64MB, netdev_max_backlog=100000, RSS/IRQ",
+                    "Контур АСУ ТП / ПДн: прием через однонаправленный аппаратный диод данных"
+                ],
+                details: "Высоконагруженные серверы первичного приема телеметрии. Оптимизированы на уровне ядра Linux (широкие буферы сокетов 64 МБ и кольцевые буферы сетевых карт 4096 дескрипторов) для полного исключения потерь датаграмм (UdpRcvbufErrors) при вирусных штормах."
+            },
+            {
+                id: "n_conn_dmz",
+                zone: "z_dmz",
+                stereotype: "«isolated integration node»",
+                title: "Выделенный сервис коннекторов (Dedicated Connector)",
+                subtitle: "Режим 4 Security Vision • 150+ интеграций СЗИ",
+                x: 1510, y: 894, w: 840, h: 186,
+                color: "#f59e0b",
+                abbrs: ["SOAR", "REST API", "LDAPS", "WMI / WinRM", "VS"],
+                specs: [
+                    "Режим 4: полное исключение прямых входящих TCP-сессий в ядро SOC!",
+                    "Сайзинг узла: 8–12 ядер CPU (2.4 ГГц), 16–24 ГБ RAM, 100 ГБ SAS",
+                    "Изоляция контейнеров Docker / netns под каждого крупного тенанта",
+                    "Протоколы: REST API, LDAPS (636), WMI/WinRM, SSH, JDBC/SQL, SMTP",
+                    "Выполнение сканирования VS (3–10 сек/хост) и команд блокировки IR"
+                ],
+                details: "Ключевой элемент безопасности платформы Security Vision 5. Вынос Dedicated Connector Service в DMZ позволяет опрашивать внешние системы и отправлять команды блокировки на NGFW/EDR/AD клиентов, при этом ни одно внешнее устройство не может инициировать прямое TCP-соединение во внутреннюю серверную зону SOC."
+            },
+            {
+                id: "n_kafka",
+                zone: "z_srv",
+                stereotype: "«distributed message buffer»",
+                title: "Буферный кластер Apache Kafka (KRaft)",
+                subtitle: "3–5 брокеров Bare-Metal • Защита от всплесков",
+                x: 50, y: 1300, w: 430, h: 270,
+                color: "#10b981",
+                abbrs: ["KRaft", "Split-Brain", "EPS"],
+                specs: [
+                    "Консенсус Raft в топике __cluster_metadata",
+                    "Кворум ⌊N/2⌋+1 (3 или 5 узлов), Failover < 1 сек",
+                    "Сохранность: rep.factor=3, min.insync=2, acks=all",
+                    "25k EPS: 3 узла (16 vCPU, 32GB, 2x960GB NVMe)",
+                    "100k EPS: 5 узлов (32 vCPU, 64GB, 2x1.92TB NVMe)"
+                ],
+                details: "Демпфирующий буфер между коллекторами DMZ и аналитическим хранилищем. Использование протокола консенсуса KRaft и параметров acks=all с фактором репликации 3 гарантирует нулевую потерю событий даже при внезапном отказе физического сервера брокера."
+            },
+            {
+                id: "n_vector",
+                zone: "z_srv",
+                stereotype: "«stateless parsing workers»",
+                title: "Нормализация логов (Vector / Logstash)",
+                subtitle: "4–12 инстансов (K8s / Bare-Metal) + Парсинг",
+                x: 520, y: 1300, w: 420, h: 270,
+                color: "#10b981",
+                abbrs: ["Vector", "SIEM", "EPS"],
+                specs: [
+                    "Нормализация сырых событий к таксономии SIEM",
+                    "Мощность: 1 ядро vCPU на каждые 1500–2500 EPS",
+                    "Защита от Data Skew: Round-Robin по партициям",
+                    "Пакетная вставка: batch.max_events = 100 000",
+                    "Таймаут сброса: batch.timeout_secs = 5 сек"
+                ],
+                details: "Преобразует гетерогенные сырые логи в строго типизированную структуру колонок ClickHouse и обогащает их гео-данными и контекстом активов. Формирует крупные пачки (batches по 100k записей), так как колоночная СУБД ClickHouse требует пакетной вставки."
+            },
+            {
+                id: "n_web",
+                zone: "z_srv",
+                stereotype: "«frontend & 6 no-code builders»",
+                title: "Security Vision 5 Web & App Server",
+                subtitle: "Кластер Active-Active (Angular + NGINX + .NET)",
+                x: 980, y: 1300, w: 450, h: 270,
+                color: "#06b6d4",
+                abbrs: ["No-Code", "RBAC", "MSSP", "Kill Chain"],
+                specs: [
+                    "Сайзинг: мин. 2 узла (12 ядер, 24 ГБ RAM, 100 ГБ)",
+                    "6 встроенных Low-Code / No-Code конструкторов:",
+                    "1) Объекты и карточки (2D/3D)  2) Workflow Engine",
+                    "3) Конструктор интеграций      4) Редактор отчетов",
+                    "5) Конструктор BI-дашбордов    6) Меню и RBAC"
+                ],
+                details: "Сервер приложений и графического интерфейса платформы Security Vision 5. Благодаря 6 параметрическим конструкторам позволяет инженерам SOC создавать новые карточки, плейбуки и дашборды за минуты без перекомпиляции кода (критерий п. 2.2 Решения 1356/QĐ-BTTTT)."
+            },
+            {
+                id: "n_services",
+                zone: "z_srv",
+                stereotype: "«core microservices & rabbitMQ»",
+                title: "Кластер 7 Фоновых Сервисов (SOT / SGRC)",
+                subtitle: "Dynamic Playbooks 2.0 • AM / VM / SPC / CM / RM",
+                x: 1470, y: 1300, w: 450, h: 270,
+                color: "#10b981",
+                abbrs: ["NG SOAR", "IRP", "AM", "VM", "SPC", "SGRC", "HITL"],
+                specs: [
+                    "Сайзинг: 2 узла (12 ядер, 32 ГБ RAM) + FT Арбитр",
+                    "7 служб: Processing, Collector, Connector, Alerting,",
+                    "Reporting, API Service и Fault Tolerance Service",
+                    "Dynamic Playbooks 2.0: 150+ атомарных действий",
+                    "Контроль легитимности и HITL для Crown Jewels"
+                ],
+                details: "Сердце бизнес-логики Security Vision 5. Processing Service в реальном времени исполняет динамические плейбуки IRP/SOAR 2.0, рассчитывает приоритизацию уязвимостей (CVSS + EPSS), проверяет профили харденинга (SPC) и контролирует 72-часовой SLA по утечкам ПДн."
+            },
+            {
+                id: "n_sda_ai",
+                zone: "z_srv",
+                stereotype: "«analytics & machine learning»",
+                title: "Домен аналитики SDA (TIP + UEBA) & LLM",
+                subtitle: "Поведенческий ML-скоринг, Retro-Match и ИИ",
+                x: 1960, y: 1300, w: 390, h: 270,
+                color: "#a855f7",
+                abbrs: ["SDA", "TIP", "UEBA", "LLM", "Sigma"],
+                specs: [
+                    "UEBA: ML-профилирование без учителя",
+                    "TIP: дедупликация IoC и Retro-match в SIEM",
+                    "ML-скоринг False Positives (ЛПС ≤ 5%)",
+                    "On-Prem LLM: полная изоляция данных КИИ",
+                    "250+ типов инцидентов и 110+ техник ATT&CK"
+                ],
+                details: "Интеллектуальное ядро SOC. Выявляет скрытые целевые атаки, не ловящиеся жесткими правилами, с помощью поведенческих моделей UEBA, проводит ретроспективный поиск по правилам Sigma и предоставляет аналитикам рекомендации локальной LLM."
+            },
+            {
+                id: "n_keeper",
+                zone: "z_db",
+                stereotype: "«raft consensus quorum»",
+                title: "Координация ClickHouse Keeper",
+                subtitle: "3 Выделенных узла • NVMe Low-Latency",
+                x: 45, y: 1794, w: 325, h: 256,
+                color: "#f59e0b",
+                abbrs: ["ClickHouse", "Split-Brain"],
+                specs: [
+                    "Вынесен с Data Nodes (защита от I/O spikes)",
+                    "Нечетный кворум Raft: 3 узла (8–16 vCPU)",
+                    "Диски: 240–480 ГБ Enterprise NVMe (fsync)",
+                    "Защита от перехода таблиц в Read-Only",
+                    "Мониторинг: echo mntr | nc keeper 9181"
+                ],
+                details: "Выделенный ансамбль координации репликации ClickHouse по алгоритму Raft. Физический вынос Keeper с узлов хранения данных жизненно необходим: иначе дисковые слияния (merges) вызывают задержки ввода-вывода, срыв Heartbeat и падение таблиц в аварийный режим Read-Only."
+            },
+            {
+                id: "n_ch_data",
+                zone: "z_db",
+                stereotype: "«columnar olap cluster»",
+                title: "Хранилище SIEM: ClickHouse + OpenSearch",
+                subtitle: "Hot Tier (NVMe RAID 10) & Warm Tier (15–90д)",
+                x: 390, y: 1794, w: 380, h: 256,
+                color: "#f43f5e",
+                abbrs: ["ClickHouse", "OpenSearch", "ILM"],
+                specs: [
+                    "Топология: 2–6 шардов × 2 реплики (128–256 ГБ)",
+                    "Сжатие ZSTD / DoubleDelta (5–8x) + bloom_filter",
+                    "Ключ: ORDER BY (tenant_id, category, timestamp)",
+                    "Hot (1–14д): NVMe RAID 10, отклик < 0.5 сек",
+                    "Warm (15–90д): SAS/HDD RAID 50/60, TTL move"
+                ],
+                details: "Высокоскоростное колоночное хранилище телеметрии. Первичный ключ сортировки начинается с низкой кардинальности (tenant_id, category), обеспечивая мгновенные OLAP-выборки и строгую изоляцию запросов в мультитенантной среде."
+            },
+            {
+                id: "n_pg_ha",
+                zone: "z_db",
+                stereotype: "«transactional htap database»",
+                title: "Транзакционная БД PostgreSQL HA",
+                subtitle: "Patroni + Primary/Standby + etcd + PgBouncer",
+                x: 790, y: 1794, w: 350, h: 256,
+                color: "#f43f5e",
+                abbrs: ["PostgreSQL", "Patroni", "Split-Brain"],
+                specs: [
+                    "Сайзинг (300k узлов): 2×12 ядер, 64 ГБ RAM",
+                    "СХД: 1 ТБ SSD RAID 1 + 4 ТБ HDD RAID 6",
+                    "shared_buffers=16GB, effective_cache=48GB",
+                    "Защита от Bloat: autovacuum_scale = 0.02",
+                    "Пул сессий: PgBouncer + HAProxy Failover"
+                ],
+                details: "Мастер-хранилище платформы Security Vision 5 (карточки инцидентов, графы атак, ресурсно-сервисная модель AM, реестр уязвимостей VM). Отказоустойчивость обеспечивается стеком Patroni + etcd с аппаратным Linux Watchdog."
+            },
+            {
+                id: "n_cold_dr",
+                zone: "z_db",
+                stereotype: "«archive s3 & geo-dr 30+ km»",
+                title: "Cold Tier S3 + Гео-ЦОД 30+ км",
+                subtitle: "Архив 91–365+ сут & DR (Уровень 5)",
+                x: 1160, y: 1794, w: 305, h: 256,
+                color: "#fb7185",
+                abbrs: ["ILM", "BCM", "TCVN 11930:2017"],
+                specs: [
+                    "Cold: TTL + 90 DAY TO 's3_cold'",
+                    "Партиции: toYYYYMM(event_date)",
+                    "Уровень 5: гео-ЦОД ≥ 30 км",
+                    "Асинхронная репликация WAL/S3",
+                    "Учения Failover Drills в BCM"
+                ],
+                details: "Долговременное архивное объектное хранилище S3 для регуляторных проверок и форензики (отклик > 30 с), совмещенное с контуром репликации в географически разнесенный резервный ЦОД на расстоянии минимум 30 км (императивное требование Уровня 5)."
+            },
+            {
+                id: "n_soc_shift",
+                zone: "z_admin",
+                stereotype: "«soc operations & dfir team»",
+                title: "АРМ Дежурной смены SOC (L1–L3)",
+                subtitle: "Штат ≥ 12 спец. (Решение 1356/QĐ-BTTTT)",
+                x: 1510, y: 1794, w: 395, h: 256,
+                color: "#8b5cf6",
+                abbrs: ["SOC", "MTTA / MTTD / MTTR", "MFA", "HITL"],
+                specs: [
+                    "Tier 1 (≥ 6 чел, 2 в смену 24/7): MTTA ≤ 10 мин",
+                    "Tier 2 (≥ 3 чел): MTTD ≤ 30м, MTTR ≤ 60м",
+                    "Tier 3 / DFIR (≥ 2 чел, опыт 5+ лет, OSCP/CHFI)",
+                    "SOC Manager (опыт 5+ лет, CISSP/CISM/CISA)",
+                    "Вход строго из Админ-зоны с проверкой MFA"
+                ],
+                details: "Физически защищенное помещение ситуационного центра SOC с видеостеной и сертифицированными АРМ. Персонал разделен на линии L1–L3 в соответствии с международными стандартами и квалификационными требованиями Решения 1356/QĐ-BTTTT."
+            },
+            {
+                id: "n_oob_infra",
+                zone: "z_oob",
+                stereotype: "«out-of-band & self-monitoring»",
+                title: "PAM-Бастион, IPMI, NTP, Zabbix & Backup",
+                subtitle: "Физически выделенная сеть OOB (Уровень 4–5)",
+                x: 1950, y: 1794, w: 405, h: 256,
+                color: "#a855f7",
+                abbrs: ["OOB", "PAM", "BCM"],
+                specs: [
+                    "PAM-шлюз: видеозапись SSH/RDP сессий + MFA",
+                    "Харденинг ОС (п. 5.2.2 TCVN): PermitRootLogin no",
+                    "Эталон времени: chronyd NTP (UTC+7 Вьетнам)",
+                    "Self-Monitoring 24/7: Prometheus / Zabbix",
+                    "Бэкап: pgBackRest (RPO < 5м), clickhouse-backup"
+                ],
+                details: "Шестая сетевая зона по стандарту TCVN 11930:2017. Объединяет аппаратные интерфейсы управления серверами (IPMI/iDRAC), бастион привилегированного доступа PAM, сервер синхронизации времени NTP и изолированное хранилище резервных копий (pgBackRest, GitOps)."
+            }
+        ];
+
+        // =========================================================================================
+        // 4. ВЕРИФИЦИРОВАННЫЕ СТЫКИ И ПРОТОКОЛЫ СВЯЗЕЙ (25 СВЯЗЕЙ В ВЫДЕЛЕННЫХ КОРИДОРАХ)
+        // =========================================================================================
+        const UML_EDGES = [
+            {
+                id: "e1", from: "n_sources", to: "n_edge_fw", category: "INGEST",
+                color: "#22d3ee", marker: "arrow-cyan", animated: true,
+                points: [[240, 310], [240, 504]],
+                labelPos: [240, 362],
+                protocol: "Syslog TLS 6514 / RELP 20514 / WEF 5986",
+                desc: "Гарантированная доставка событий от 4 классов источников через шифрованные туннели IPsec/TLS VPN (с подсчетом октетов Octet Counting по RFC 5424)."
+            },
+            {
+                id: "e2", from: "n_edr_agents", to: "n_edge_fw", category: "INGEST",
+                color: "#fb7185", marker: "arrow-rose", animated: true,
+                points: [[580, 310], [580, 504]],
+                labelPos: [580, 362],
+                protocol: "EDR Agent mTLS (TCP 443 / 8443)",
+                desc: "Двусторонний защищенный канал агентов Security Vision EDR с локальной дисковой очередью на хосте: передача телеметрии ядра и прием команд изоляции."
+            },
+            {
+                id: "e3", from: "n_tenant_dmz", to: "n_edge_fw", category: "SOAR",
+                color: "#22d3ee", marker: "arrow-cyan", animated: true,
+                points: [[1150, 310], [1150, 396], [650, 396], [650, 504]],
+                labelPos: [920, 396],
+                protocol: "IPsec / TLS VPN (Госсеть СРВ)",
+                desc: "Выделенный шифрованный канал связи от локального шлюза министерства (Слой 1) до пограничного кластера NGFW ЦОД SOC."
+            },
+            {
+                id: "e4", from: "n_edge_fw", to: "n_tap_npb", category: "INGEST",
+                color: "#22d3ee", marker: "arrow-cyan", animated: true,
+                points: [[690, 595], [870, 595]],
+                labelPos: [780, 595],
+                protocol: "TAP 50/50 (10G/100G)",
+                desc: "Пассивное оптическое расщепление полнодуплексного трафика фабрики Spine-Leaf без потерь и без нагрузки на процессоры коммутаторов."
+            },
+            {
+                id: "e5", from: "n_tap_npb", to: "n_nta_ids", category: "INGEST",
+                color: "#22d3ee", marker: "arrow-cyan", animated: true,
+                points: [[1530, 595], [1710, 595]],
+                labelPos: [1620, 595],
+                protocol: "NPB L2-L4 Sliced",
+                desc: "Подача дедуплицированного и усеченного (Packet Slicing без L7 нагрузки) трафика с сохранением симметрии сессий на Bare-Metal сенсоры NTA."
+            },
+            {
+                id: "e6", from: "n_edge_fw", to: "n_waf_proxy", category: "INGEST",
+                color: "#22d3ee", marker: "arrow-cyan", animated: true,
+                points: [[230, 686], [230, 894]],
+                labelPos: [230, 742],
+                protocol: "HTTPS TLS 1.3 (TCP 443)",
+                desc: "Маршрутизация внешних запросов пользователей клиентского портала и вебхуков через пограничный экран на кластер WAF в DMZ."
+            },
+            {
+                id: "e7", from: "n_edge_fw", to: "n_ingest_col", category: "INGEST",
+                color: "#22d3ee", marker: "arrow-cyan", animated: true,
+                points: [[620, 686], [620, 742], [950, 742], [950, 894]],
+                labelPos: [785, 742],
+                protocol: "TCP 6514 / RELP 20514 / UDP 2055",
+                desc: "Передача потоков событий ИБ и телеметрии NetFlow/IPFIX из пограничной зоны на высоконагруженные коллекторы в Ingest DMZ."
+            },
+            {
+                id: "e8", from: "n_nta_ids", to: "n_ingest_col", category: "INGEST",
+                color: "#22d3ee", marker: "arrow-cyan", animated: true,
+                points: [[1920, 686], [1920, 742], [1280, 742], [1280, 894]],
+                labelPos: [1540, 742],
+                protocol: "JSON Metadata / Syslog TLS 6514",
+                desc: "Отправка сработок сетевых сенсоров NIDS и метаданных сессий NTA/NDR в конвейер сбора телеметрии."
+            },
+            {
+                id: "e9", from: "n_conn_dmz", to: "n_regulators", category: "REG",
+                color: "#34d399", marker: "arrow-emerald", animated: true,
+                points: [[1670, 894], [1670, 362], [1635, 362], [1635, 310]],
+                labelPos: [1635, 362],
+                protocol: "REST API / STIX 2.1 / TAXII (TCP 443)",
+                desc: "Автоматическая двусторонняя синхронизация с NCSC (Слой 4), VNCERT/CC (≤ 5 дней), A05 MPS (≤ 72ч по ПДн) и ГосСОПКА / ФинЦЕРТ."
+            },
+            {
+                id: "e10", from: "n_conn_dmz", to: "n_cloud_ti", category: "REG",
+                color: "#34d399", marker: "arrow-emerald", animated: true,
+                points: [[2358, 980], [2358, 362], [2115, 362], [2115, 310]],
+                labelPos: [2150, 362],
+                protocol: "HTTPS API (30+ TI Feeds & LLM Obfuscated)",
+                desc: "Обогащение индикаторов компрометации (IoC) через VirusTotal, AbuseIPDB, Shodan и отправка обфусцированных артефактов во внешние LLM."
+            },
+            {
+                id: "e11", from: "n_conn_dmz", to: "n_edge_fw", category: "SOAR",
+                color: "#fb7185", marker: "arrow-rose", animated: true,
+                points: [[1600, 894], [1600, 782], [460, 782], [460, 686]],
+                labelPos: [1080, 782],
+                protocol: "SOAR IR: REST API / LDAPS 636 / WinRM 5986 / SSH",
+                desc: "Исполнение команд активного сдерживания (Containment): блокировка IP на NGFW/WAF, изоляция хостов EDR и блокировка учетных записей в Active Directory."
+            },
+            {
+                id: "e12", from: "n_waf_proxy", to: "n_web", category: "INGEST",
+                color: "#22d3ee", marker: "arrow-cyan", animated: true,
+                points: [[330, 1080], [330, 1172], [1160, 1172], [1160, 1300]],
+                labelPos: [920, 1172],
+                protocol: "HTTPS Reverse Proxy (TCP 443 / 8443)",
+                desc: "Передача проверенных WAF пользовательских сессий на балансируемый кластер Active-Active веб-портала Security Vision 5."
+            },
+            {
+                id: "e13", from: "n_ingest_col", to: "n_kafka", category: "INGEST",
+                color: "#22d3ee", marker: "arrow-cyan", animated: true,
+                points: [[820, 1080], [820, 1134], [265, 1134], [265, 1300]],
+                labelPos: [540, 1134],
+                protocol: "Kafka TLS Producer (TCP 9093, acks=all, rep=3)",
+                desc: "Гарантированная запись сырых потоков телеметрии из DMZ в партиционированные топики брокеров Apache Kafka с подтверждением от всех синхронных реплик."
+            },
+            {
+                id: "e15", from: "n_services", to: "n_conn_dmz", category: "SOAR",
+                color: "#fb7185", marker: "arrow-rose", animated: true,
+                points: [[1800, 1300], [1800, 1080]],
+                labelPos: [1800, 1152],
+                protocol: "AMQP TLS 5671 / Outbound mTLS (Без TCP-входа из DMZ!)",
+                desc: "Обмен очередями задач и результатами сканирования между ядром Security Vision и вынесенным коннектором при полном запрете входящих TCP-сессий из DMZ."
+            },
+            {
+                id: "e14", from: "n_kafka", to: "n_vector", category: "INGEST",
+                color: "#22d3ee", marker: "arrow-cyan", animated: true,
+                points: [[480, 1435], [520, 1435]],
+                labelPos: [500, 1282],
+                protocol: "Consumer Group (TCP 9093)",
+                desc: "Параллельная вычитка партиций топиков Kafka пулом stateless-воркеров синтаксического разбора и нормализации Vector."
+            },
+            {
+                id: "e16", from: "n_web", to: "n_services", category: "SOAR",
+                color: "#22d3ee", marker: "arrow-cyan", animated: true,
+                points: [[1430, 1435], [1470, 1435]],
+                labelPos: [1450, 1282],
+                protocol: "gRPC / RabbitMQ (.NET C#)",
+                desc: "Высокоскоростное взаимодействие веб-интерфейса и 6 конструкторов с фоновыми службами обработки плейбуков, отчетов и оповещений."
+            },
+            {
+                id: "e17", from: "n_services", to: "n_sda_ai", category: "SOAR",
+                color: "#34d399", marker: "arrow-emerald", animated: true,
+                points: [[1920, 1435], [1960, 1435]],
+                labelPos: [1940, 1282],
+                protocol: "REST / gRPC (ML & TIP)",
+                desc: "Передача инцидентов на автоматический скоринг ложных срабатываний (ML), проверку IoC в TIP, поведенческий анализ UEBA и генерацию сводки локальной LLM."
+            },
+            {
+                id: "e18", from: "n_vector", to: "n_ch_data", category: "INGEST",
+                color: "#22d3ee", marker: "arrow-cyan", animated: true,
+                points: [[650, 1570], [650, 1794]],
+                labelPos: [480, 1622],
+                protocol: "ClickHouse Native TLS 9440 (Batch 100k)",
+                desc: "Высокоскоростная пакетная вставка нормализованных событий в шардированные таблицы Distributed / ReplicatedMergeTree на NVMe-диски Hot Tier."
+            },
+            {
+                id: "e20", from: "n_services", to: "n_pg_ha", category: "HA",
+                color: "#fbbf24", marker: "arrow-amber", animated: true,
+                points: [[1580, 1570], [1580, 1622], [965, 1622], [965, 1794]],
+                labelPos: [1150, 1622],
+                protocol: "PgBouncer / HAProxy (TCP 5432 / 6432 ACID)",
+                desc: "Транзакционная запись и чтение карточек инцидентов, графов Kill Chain, активов AM и уязвимостей VM через пулер соединений PgBouncer на Primary-узел PostgreSQL."
+            },
+            {
+                id: "e21", from: "n_sda_ai", to: "n_ch_data", category: "SOAR",
+                color: "#34d399", marker: "arrow-emerald", animated: true,
+                points: [[2060, 1570], [2060, 1656], [520, 1656], [520, 1794]],
+                labelPos: [840, 1656],
+                protocol: "OLAP Retro-Match & Sigma Query (TCP 8443)",
+                desc: "Автоматический опрос исторического массива логов (Incident Vicinity) по правилам Sigma и новым индикаторам IoC для достраивания графа атаки Kill Chain."
+            },
+            {
+                id: "e24", from: "n_soc_shift", to: "n_web", category: "SOAR",
+                color: "#c084fc", marker: "arrow-purple", animated: true,
+                points: [[1710, 1794], [1710, 1684], [1250, 1684], [1250, 1570]],
+                labelPos: [1520, 1684],
+                protocol: "HTTPS TLS 1.3 (Консоль L1-L3 + HITL Approval)",
+                desc: "Работа дежурной смены в консоли Security Vision 5: триаж инцидентов, интерактивное управление графом Kill Chain и ручное подтверждение блокировок (HITL)."
+            },
+            {
+                id: "e25", from: "n_oob_infra", to: "n_sda_ai", category: "HA",
+                color: "#c084fc", marker: "arrow-purple", animated: true,
+                points: [[2210, 1794], [2210, 1570]],
+                labelPos: [2160, 1622],
+                protocol: "OOB: IPMI / NTP (UTC+7) / Zabbix / Backup",
+                desc: "Независимый контур синхронизации эталонного времени NTP (UTC+7), съема телеметрии здоровья кластера (Zabbix/Prometheus) и архивации бэкапов."
+            },
+            {
+                id: "e19", from: "n_keeper", to: "n_ch_data", category: "HA",
+                color: "#fbbf24", marker: "arrow-amber", animated: true,
+                points: [[370, 1920], [390, 1920]],
+                labelPos: [380, 1776],
+                protocol: "Raft Quorum (TCP 9181)",
+                desc: "Непрерывная координация метаданных репликации и распределенных блокировок от 3 выделенных узлов ClickHouse Keeper."
+            },
+            {
+                id: "e22", from: "n_ch_data", to: "n_cold_dr", category: "HA",
+                color: "#fbbf24", marker: "arrow-amber", animated: true,
+                points: [[770, 2030], [770, 2060], [1310, 2060], [1310, 2050]],
+                labelPos: [1155, 1776],
+                protocol: "S3 ILM (TTL > 90d) + Geo-DR (30+ км)",
+                desc: "Фоновая выгрузка архивных партиций старше 90 суток в объектное хранилище S3 (Ceph/MinIO) и асинхронная репликация в резервный ЦОД на расстоянии ≥ 30 км."
+            },
+            {
+                id: "e23", from: "n_soc_shift", to: "n_oob_infra", category: "HA",
+                color: "#c084fc", marker: "arrow-purple", animated: true,
+                points: [[1905, 1920], [1950, 1920]],
+                labelPos: [1928, 1776],
+                protocol: "PAM Bastion + MFA (SSH/RDP)",
+                desc: "Аутентификация аналитиков L1–L3 и системных инженеров через шлюз контроля привилегированного доступа с аппаратным вторым фактором (MFA)."
+            }
+        ];
+
+        // =========================================================================================
+        // 5. СОСТОЯНИЕ ПРИЛОЖЕНИЯ, КАМЕРЫ И МОБИЛЬНОГО РЕЖИМА 
+        // =========================================================================================
+        let camScale = 0.52;
+        let camX = 20;
+        let camY = 15;
+        let animFrameId = null;
+        let isDraggingCanvas = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let currentLayerFilter = 'ALL';
+        let flowAnimEnabled = true;
+        let currentInterfaceMode = 'desktop'; // 'desktop' | 's25'
+        let s25SubView = 'cards'; // 'cards' (Вертикальный UML-поток) | 'canvas' (2D Чертеж)
+        let s25ActiveZoneFilter = 'ALL';
+        let selectedElementId = 'n_services';
+        let activeZoneId = null;
+        let isLeftSidebarOpen = true;
+        let isRightInspectorOpen = true;
+
+        const svgEl = document.getElementById('uml-svg');
+        const svgDefsEl = document.getElementById('uml-svg-defs');
+        const svgStageEl = document.getElementById('svg-stage');
+        const cameraGroup = document.getElementById('uml-camera-group');
+        const zonesLayer = document.getElementById('uml-zones-layer');
+        const edgesLayer = document.getElementById('uml-edges-layer');
+        const nodesLayer = document.getElementById('uml-nodes-layer');
+        const edgeLabelsLayer = document.getElementById('uml-edge-labels-layer');
+
+        // Плавная анимация камеры 2D-холста
+        function animateCameraTo(targetX, targetY, targetScale, duration = 260) {
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            const startX = camX;
+            const startY = camY;
+            const startScale = camScale;
+            const startTime = performance.now();
+
+            function step(now) {
+                const t = Math.min((now - startTime) / duration, 1);
+                const ease = 1 - Math.pow(1 - t, 3);
+                camX = startX + (targetX - startX) * ease;
+                camY = startY + (targetY - startY) * ease;
+                camScale = startScale + (targetScale - startScale) * ease;
+                updateCameraTransform();
+                if (t < 1) {
+                    animFrameId = requestAnimationFrame(step);
+                } else {
+                    animFrameId = null;
+                }
+            }
+            animFrameId = requestAnimationFrame(step);
+        }
+
+        // Управление боковыми панелями в Desktop-режиме
+        function toggleLeftSidebar(forceState) {
+            if (currentInterfaceMode === 's25') return;
+            const leftSidebar = document.getElementById('left-sidebar');
+            const btnLeft = document.getElementById('btn-toggle-left');
+            isLeftSidebarOpen = forceState !== undefined ? forceState : !isLeftSidebarOpen;
+
+            if (isLeftSidebarOpen) {
+                leftSidebar.classList.remove('hidden');
+                btnLeft.innerHTML = '<span>◧ Скрыть зоны</span>';
+            } else {
+                leftSidebar.classList.add('hidden');
+                btnLeft.innerHTML = '<span>◧ Показать 7 зон</span>';
+            }
+            setTimeout(() => {
+                if (activeZoneId) focusZone(activeZoneId, false);
+                else fitDiagramToScreen(true);
+            }, 40);
+        }
+
+        function toggleRightInspector(forceState) {
+            if (currentInterfaceMode === 's25') {
+                toggleMobileInspectorSheet(forceState !== undefined ? forceState : true);
+                return;
+            }
+            const rightInspector = document.getElementById('right-inspector');
+            const btnRightText = document.getElementById('btn-toggle-right-text');
+            isRightInspectorOpen = forceState !== undefined ? forceState : !isRightInspectorOpen;
+
+            if (isRightInspectorOpen) {
+                rightInspector.classList.remove('hidden');
+                btnRightText.textContent = 'Скрыть инспектор ✕';
+            } else {
+                rightInspector.classList.add('hidden');
+                btnRightText.textContent = 'Открыть инспектор ◨';
+            }
+            setTimeout(() => {
+                if (activeZoneId) focusZone(activeZoneId, false);
+                else fitDiagramToScreen(true);
+            }, 40);
+        }
+
+        // Автоопределение режима устройства (Desktop vs )
+        function detectAndApplyDeviceMode() {
+            const ua = navigator.userAgent || '';
+            const isMobileViewport = window.innerWidth <= 900;
+            const isSamsungOrMobileUA = /SM-S93|Galaxy|Android|iPhone|Mobile/i.test(ua);
+
+            if (isMobileViewport || isSamsungOrMobileUA) {
+                switchInterfaceMode('s25', true);
+            } else {
+                if (window.innerWidth <= 1420) {
+                    isRightInspectorOpen = false;
+                }
+                switchInterfaceMode('desktop', true);
+            }
+        }
+
+        // Переключение между Desktop и 
+        function switchInterfaceMode(mode, isAuto = false) {
+            currentInterfaceMode = mode;
+            hideAbbrBubble();
+
+            const badge = document.getElementById('device-badge');
+            const leftSidebar = document.getElementById('left-sidebar');
+            const rightInspector = document.getElementById('right-inspector');
+            const desktopToolbar = document.getElementById('desktop-canvas-toolbar');
+            const s25TopHeader = document.getElementById('s25-top-header');
+            const s25VerticalView = document.getElementById('s25-vertical-uml-view');
+            const mobileBar = document.getElementById('mobile-s25-bar');
+            const floatingZoomBar = document.getElementById('floating-zoom-bar');
+            const s25Stepper = document.getElementById('s25-canvas-stepper');
+            const workspace = document.getElementById('workspace-wrapper');
+            const btnDesktop = document.getElementById('btn-mode-desktop');
+            const btnS25 = document.getElementById('btn-mode-s25');
+            const btnToggleRightText = document.getElementById('btn-toggle-right-text');
+
+            if (mode === 's25') {
+                badge.textContent = isAuto ? 'AUTO: SAMSUNG S25 UI' : 'SAMSUNG S25 (412×915)';
+                badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40 whitespace-nowrap';
+
+                // Скрываем десктопные панели, чтобы ничего не мешало в мобильном экране
+                leftSidebar.classList.add('hidden');
+                rightInspector.classList.add('hidden');
+                desktopToolbar.classList.add('hidden');
+
+                // Показываем специализированные непрозрачные панели Samsung S25
+                s25TopHeader.classList.remove('hidden');
+                mobileBar.classList.remove('hidden');
+
+                if (window.innerWidth > 900) {
+                    workspace.classList.add('s25-frame-emulator');
+                } else {
+                    workspace.classList.remove('s25-frame-emulator');
+                }
+
+                btnS25.className = 'px-2 py-1 rounded text-[11px] font-mono flex items-center gap-1 transition bg-cyan-500 text-slate-950 font-semibold whitespace-nowrap';
+                btnDesktop.className = 'px-2 py-1 rounded text-[11px] font-mono flex items-center gap-1 transition text-slate-400 hover:text-white whitespace-nowrap';
+
+                // По умолчанию в S25 открываем кристально читаемый вертикальный UML-поток (или выбранный подрежим)
+                setS25ViewMode(s25SubView);
+            } else {
+                badge.textContent = isAuto ? 'AUTO: DESKTOP CAD' : 'DESKTOP CAD WORKSTATION';
+                badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 whitespace-nowrap';
+
+                s25TopHeader.classList.add('hidden');
+                s25VerticalView.classList.add('hidden');
+                mobileBar.classList.add('hidden');
+                s25Stepper.classList.add('hidden');
+                toggleMobileInspectorSheet(false);
+
+                desktopToolbar.classList.remove('hidden');
+                svgStageEl.classList.remove('hidden');
+
+                if (isLeftSidebarOpen) leftSidebar.classList.remove('hidden');
+                else leftSidebar.classList.add('hidden');
+
+                if (isRightInspectorOpen) {
+                    rightInspector.classList.remove('hidden');
+                    btnToggleRightText.textContent = 'Скрыть инспектор ✕';
+                } else {
+                    rightInspector.classList.add('hidden');
+                    btnToggleRightText.textContent = 'Открыть инспектор ◨';
+                }
+
+                floatingZoomBar.className = 'absolute bottom-4 left-4 z-20 flex items-center gap-1.5 solid-bg-panel border border-slate-700 p-1.5 rounded-xl shadow-2xl';
+                workspace.classList.remove('s25-frame-emulator');
+
+                btnDesktop.className = 'px-2 py-1 rounded text-[11px] font-mono flex items-center gap-1 transition bg-cyan-500 text-slate-950 font-semibold whitespace-nowrap';
+                btnS25.className = 'px-2 py-1 rounded text-[11px] font-mono flex items-center gap-1 transition text-slate-400 hover:text-white whitespace-nowrap';
+
+                setTimeout(() => {
+                    fitDiagramToScreen(true);
+                }, 50);
+            }
+        }
+
+        // Переключение внутри режима Samsung S25: «Мобильный UML-Поток (Карточки)» vs «2D Чертеж CAD»
+        function setS25ViewMode(viewMode) {
+            s25SubView = viewMode;
+            const s25VerticalView = document.getElementById('s25-vertical-uml-view');
+            const s25Stepper = document.getElementById('s25-canvas-stepper');
+            const floatingZoomBar = document.getElementById('floating-zoom-bar');
+            const btnCards = document.getElementById('btn-s25-view-cards');
+            const btnCanvas = document.getElementById('btn-s25-view-canvas');
+            const navFlow = document.getElementById('nav-s25-flow');
+            const navCad = document.getElementById('nav-s25-cad');
+
+            if (viewMode === 'cards') {
+                s25VerticalView.classList.remove('hidden');
+                svgStageEl.classList.add('hidden');
+                s25Stepper.classList.add('hidden');
+
+                btnCards.className = 'px-2 py-1 rounded bg-cyan-500 text-slate-950 font-bold transition';
+                btnCanvas.className = 'px-2 py-1 rounded text-slate-300 hover:text-white transition';
+                navFlow.className = 'flex flex-col items-center gap-0.5 text-cyan-400 font-mono text-[10px] px-2 py-1';
+                navCad.className = 'flex flex-col items-center gap-0.5 text-slate-400 font-mono text-[10px] px-2 py-1';
+
+                renderS25VerticalUML();
+            } else {
+                s25VerticalView.classList.add('hidden');
+                svgStageEl.classList.remove('hidden');
+                s25Stepper.classList.remove('hidden');
+                floatingZoomBar.className = 'absolute top-2.5 left-2.5 z-20 flex items-center gap-1 solid-bg-panel border border-slate-700 p-1 rounded-xl shadow-2xl';
+
+                btnCanvas.className = 'px-2 py-1 rounded bg-cyan-500 text-slate-950 font-bold transition';
+                btnCards.className = 'px-2 py-1 rounded text-slate-300 hover:text-white transition';
+                navCad.className = 'flex flex-col items-center gap-0.5 text-cyan-400 font-mono text-[10px] px-2 py-1';
+                navFlow.className = 'flex flex-col items-center gap-0.5 text-slate-400 font-mono text-[10px] px-2 py-1';
+
+                setTimeout(() => {
+                    focusNode(selectedElementId || 'n_services');
+                }, 40);
+            }
+        }
+
+        // Фильтрация по зоне в мобильном режиме Samsung S25
+        function selectS25ZoneFilter(zoneId) {
+            s25ActiveZoneFilter = zoneId;
+            const allPills = ['ALL', ...UML_ZONES.map(z => z.id)];
+            allPills.forEach(id => {
+                const el = document.getElementById(`s25-pill-${id}`);
+                if (!el) return;
+                if (id === zoneId) {
+                    el.className = 'px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-cyan-500 text-slate-950 shrink-0';
+                } else {
+                    el.className = 'px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-slate-300 border border-slate-700 shrink-0';
+                }
+            });
+
+            if (s25SubView === 'cards') {
+                renderS25VerticalUML();
+                document.getElementById('s25-vertical-uml-view').scrollTop = 0;
+            } else {
+                if (zoneId === 'ALL') {
+                    fitDiagramToScreen(true);
+                } else {
+                    const firstNodeInZone = UML_NODES.find(n => n.zone === zoneId);
+                    if (firstNodeInZone) {
+                        focusNode(firstNodeInZone.id);
+                    }
+                }
+            }
+        }
+
+        // Пошаговый переход по 18 узлам в 2D-режиме на Samsung S25
+        function stepMobileNode(direction) {
+            const currentIndex = UML_NODES.findIndex(n => n.id === selectedElementId);
+            const nextIndex = (currentIndex + direction + UML_NODES.length) % UML_NODES.length;
+            const nextNode = UML_NODES[nextIndex];
+            focusNode(nextNode.id);
+        }
+
+        // =========================================================================================
+        // 6. ОТРИСОВКА МОБИЛЬНОГО ВЕРТИКАЛЬНОГО UML-ПОТОКА ДЛЯ SAMSUNG S25 (100% ЧИТАЕМОСТЬ)
+        // =========================================================================================
+        function renderS25VerticalUML() {
+            const container = document.getElementById('s25-vertical-uml-view');
+            if (!container) return;
+
+            const zonesToRender = s25ActiveZoneFilter === 'ALL'
+                ? UML_ZONES
+                : UML_ZONES.filter(z => z.id === s25ActiveZoneFilter);
+
+            let html = `
+                <!-- Краткая сводка в шапке мобильного потока -->
+                <div class="solid-bg-card border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-2">
+                    <div>
+                        <div class="text-[11px] font-mono text-cyan-400 font-bold">ВЕРТИКАЛЬНАЯ ДЕКОМПОЗИЦИЯ UML 2.5</div>
+                        <div class="text-xs text-slate-300 mt-0.5">Нажмите на любой компонент, стык или аббревиатуру для просмотра спецификации</div>
+                    </div>
+                    <button onclick="setS25ViewMode('canvas')" class="px-2.5 py-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 font-mono text-[10px] shrink-0">
+                        Открыть 2D ↗
+                    </button>
+                </div>
+            `;
+
+            zonesToRender.forEach((zone, zIdx) => {
+                const zoneNodes = UML_NODES.filter(n => n.zone === zone.id);
+
+                html += `
+                    <!-- Пакет сетевой зоны UML -->
+                    <div class="rounded-2xl border-2 overflow-hidden shadow-xl solid-bg-panel" style="border-color: ${zone.stroke}">
+                        <!-- Шапка сетевой зоны -->
+                        <div class="p-3 solid-bg-card border-b border-slate-800">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border" style="color: ${zone.stroke}; border-color: ${zone.stroke}">
+                                    ПАКЕТ ЗОНЫ • ${zoneNodes.length} УЗЛА
+                                </span>
+                                <button onclick="showAbbrBubble('TCVN 11930:2017', event)" class="text-[10px] font-mono text-cyan-300 underline">
+                                    TCVN 11930 ⓘ
+                                </button>
+                            </div>
+                            <h3 class="text-xs font-mono font-bold mt-1.5 leading-snug" style="color: ${zone.stroke}">${zone.code}</h3>
+                            <p class="text-xs text-slate-200 font-medium mt-1 leading-snug">${zone.title}</p>
+                            <div class="text-[10px] font-mono text-slate-400 mt-1">${zone.standard}</div>
+                        </div>
+
+                        <!-- Список UML-компонентов внутри зоны -->
+                        <div class="p-2.5 space-y-3 solid-bg-panel">
+                            ${zoneNodes.map(node => {
+                                const outEdges = UML_EDGES.filter(e => e.from === node.id);
+                                const inEdges = UML_EDGES.filter(e => e.to === node.id);
+
+                                return `
+                                    <div onclick="selectNode('${node.id}', true)" class="solid-bg-card rounded-xl border-l-4 border border-slate-800 p-3 shadow-md active:scale-[0.99] transition cursor-pointer" style="border-left-color: ${node.color}">
+                                        <!-- Верхняя строка компонента: стереотип и кнопка 2D -->
+                                        <div class="flex items-center justify-between gap-2">
+                                            <span class="text-[10px] font-mono font-semibold" style="color: ${node.color}">${node.stereotype}</span>
+                                            <button onclick="event.stopPropagation(); setS25ViewMode('canvas'); focusNode('${node.id}')" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700">
+                                                На 2D-схеме ⌖
+                                            </button>
+                                        </div>
+
+                                        <!-- Название и подзаголовок узла -->
+                                        <h4 class="text-sm font-bold text-white mt-1 leading-snug">${node.title}</h4>
+                                        <div class="text-xs font-mono text-slate-400 mt-0.5">${node.subtitle}</div>
+
+                                        <!-- Спецификация узла -->
+                                        <ul class="mt-2.5 space-y-1 text-xs font-mono text-slate-200 solid-bg-main p-2.5 rounded-lg border border-slate-800/90">
+                                            ${node.specs.map(s => `<li class="flex items-start gap-1.5"><span style="color:${node.color}">▸</span><span>${s}</span></li>`).join('')}
+                                        </ul>
+
+                                        <!-- Интерактивные баббл-чипы аббревиатур -->
+                                        <div class="mt-2.5 flex flex-wrap gap-1.5">
+                                            ${node.abbrs.map(abbr => `
+                                                <button onclick="event.stopPropagation(); showAbbrBubble('${abbr}', event)" class="px-2 py-0.5 rounded text-[11px] font-mono font-bold solid-bg-main border hover:brightness-125 transition flex items-center gap-1" style="color: ${node.color}; border-color: ${node.color}">
+                                                    <span>${abbr}</span>
+                                                    <span class="text-[9px] opacity-80">ⓘ</span>
+                                                </button>
+                                            `).join('')}
+                                        </div>
+
+                                        <!-- Сетевые стыки и протоколы компонента -->
+                                        <div class="mt-3 pt-2.5 border-t border-slate-800/90 space-y-1.5">
+                                            <div class="text-[10px] font-mono uppercase text-slate-400 font-semibold">
+                                                Сетевые стыки UML (${inEdges.length} вх. / ${outEdges.length} исх.):
+                                            </div>
+                                            ${outEdges.map(edge => {
+                                                const targetNode = UML_NODES.find(n => n.id === edge.to);
+                                                return `
+                                                    <div onclick="event.stopPropagation(); inspectEdgeById('${edge.id}')" class="p-2 rounded-lg solid-bg-main border border-slate-800 flex flex-col gap-0.5">
+                                                        <div class="flex items-center justify-between text-[10px] font-mono">
+                                                            <span class="font-bold" style="color: ${edge.color}">ИСХ. ПОРТ ➔</span>
+                                                            <span class="text-slate-400 truncate max-w-[180px]">${targetNode ? targetNode.title : edge.to}</span>
+                                                        </div>
+                                                        <div class="text-[11px] font-mono font-bold text-white">${edge.protocol}</div>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                            ${inEdges.map(edge => {
+                                                const sourceNode = UML_NODES.find(n => n.id === edge.from);
+                                                return `
+                                                    <div onclick="event.stopPropagation(); inspectEdgeById('${edge.id}')" class="p-2 rounded-lg solid-bg-main border border-slate-800/70 flex flex-col gap-0.5">
+                                                        <div class="flex items-center justify-between text-[10px] font-mono">
+                                                            <span class="text-emerald-400 font-bold">⬅ ВХ. ПОРТ</span>
+                                                            <span class="text-slate-400 truncate max-w-[180px]">от: ${sourceNode ? sourceNode.title : edge.from}</span>
+                                                        </div>
+                                                        <div class="text-[11px] font-mono text-slate-200">${edge.protocol}</div>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+
+                if (zIdx < zonesToRender.length - 1) {
+                    html += `
+                        <div class="flex flex-col items-center justify-center py-1 text-cyan-400 font-mono text-[10px]">
+                            <div class="w-0.5 h-3 bg-cyan-500/60"></div>
+                            <div class="px-2.5 py-0.5 rounded-full solid-bg-card border border-cyan-500/40">▼ МЕЖЗОННЫЙ ШЛЮЗ NGFW / ТРАНСПОРТ ▼</div>
+                            <div class="w-0.5 h-3 bg-cyan-500/60"></div>
+                        </div>
+                    `;
+                }
+            });
+
+            container.innerHTML = html;
+        }
+
+        // =========================================================================================
+        // 7. ОТРИСОВКА ВЕКТОРНОЙ 2D UML-ДИАГРАММЫ (НЕПРОЗРАЧНЫЕ КАРТОЧКИ И ЧИСТЫЕ КОРИДОРЫ)
+        // =========================================================================================
+        function renderUMLDiagram() {
+            zonesLayer.innerHTML = '';
+            edgesLayer.innerHTML = '';
+            nodesLayer.innerHTML = '';
+            edgeLabelsLayer.innerHTML = '';
+
+            svgDefsEl.querySelectorAll('clipPath').forEach(cp => cp.remove());
+            UML_NODES.forEach(node => {
+                const cp = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+                cp.setAttribute('id', `clip-${node.id}`);
+                cp.innerHTML = `<rect x="${node.x + 2}" y="${node.y + 2}" width="${node.w - 4}" height="${node.h - 4}" rx="9" />`;
+                svgDefsEl.appendChild(cp);
+            });
+
+            // 1. Отрисовка 7 сетевых зон с 2-рядными непрозрачными шапками
+            UML_ZONES.forEach(z => {
+                const isZoneFocused = activeZoneId === z.id;
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.innerHTML = `
+                    <rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="10" 
+                          class="${isZoneFocused ? 'active-zone-rect' : ''}"
+                          fill="${z.fill}" stroke="${z.stroke}" stroke-width="${isZoneFocused ? '3' : '1.8'}" stroke-dasharray="10 5" />
+                    <path d="M ${z.x} ${z.y + 30} L ${z.x} ${z.y + 10} Q ${z.x} ${z.y} ${z.x + 10} ${z.y} L ${z.x + z.w - 10} ${z.y} Q ${z.x + z.w} ${z.y} ${z.x + z.w} ${z.y + 10} L ${z.x + z.w} ${z.y + 30} Z" 
+                          fill="#0b1120" stroke="${z.stroke}" stroke-width="1.4" />
+                    <text x="${z.x + 14}" y="${z.y + 20}" fill="${z.stroke}" font-family="JetBrains Mono, monospace" font-weight="700" font-size="12.5">
+                        ${z.code}
+                    </text>
+                    <text x="${z.x + z.w - 14}" y="${z.y + 20}" text-anchor="end" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="11">
+                        ${z.standard}
+                    </text>
+                    <rect x="${z.x + 1}" y="${z.y + 30}" width="${z.w - 2}" height="28" fill="#090d16" />
+                    <line x1="${z.x}" y1="${z.y + 58}" x2="${z.x + z.w}" y2="${z.y + 58}" stroke="${z.stroke}" stroke-opacity="0.4" stroke-width="1" />
+                    <text x="${z.x + 14}" y="${z.y + 49}" fill="#e2e8f0" font-family="Inter, sans-serif" font-weight="600" font-size="12">
+                        ${z.title}
+                    </text>
+                `;
+                zonesLayer.appendChild(g);
+            });
+
+            // 2. Отрисовка ортогональных связей и непрозрачных плашек протоколов
+            UML_EDGES.forEach(edge => {
+                const isVisible = currentLayerFilter === 'ALL' || edge.category === currentLayerFilter;
+                const opacity = isVisible ? '1' : '0.1';
+                const dPath = buildOrthogonalPath(edge.points);
+
+                const bgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                bgPath.setAttribute('d', dPath);
+                bgPath.setAttribute('fill', 'none');
+                bgPath.setAttribute('stroke', edge.color);
+                bgPath.setAttribute('stroke-width', '2.4');
+                bgPath.setAttribute('stroke-opacity', isVisible ? '0.32' : '0.06');
+                edgesLayer.appendChild(bgPath);
+
+                const mainPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                mainPath.setAttribute('d', dPath);
+                mainPath.setAttribute('fill', 'none');
+                mainPath.setAttribute('stroke', edge.color);
+                mainPath.setAttribute('stroke-width', '2.4');
+                mainPath.setAttribute('opacity', opacity);
+                mainPath.setAttribute('marker-end', `url(#${edge.marker})`);
+                mainPath.setAttribute('class', (flowAnimEnabled && isVisible) ? 'uml-edge-animated cursor-pointer' : 'uml-edge-static cursor-pointer');
+                mainPath.onclick = (e) => {
+                    e.stopPropagation();
+                    inspectEdge(edge);
+                };
+                edgesLayer.appendChild(mainPath);
+
+                const startPt = edge.points[0];
+                const endPt = edge.points[edge.points.length - 1];
+                [startPt, endPt].forEach(pt => {
+                    const portSquare = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    portSquare.setAttribute('x', pt[0] - 4);
+                    portSquare.setAttribute('y', pt[1] - 4);
+                    portSquare.setAttribute('width', '8');
+                    portSquare.setAttribute('height', '8');
+                    portSquare.setAttribute('rx', '2');
+                    portSquare.setAttribute('fill', '#090d16');
+                    portSquare.setAttribute('stroke', edge.color);
+                    portSquare.setAttribute('stroke-width', '2');
+                    portSquare.setAttribute('opacity', opacity);
+                    edgesLayer.appendChild(portSquare);
+                });
+
+                const [lx, ly] = edge.labelPos;
+                const badgeWidth = Math.max(edge.protocol.length * 6.3 + 18, 130);
+                const labelGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                labelGroup.setAttribute('opacity', opacity);
+                labelGroup.setAttribute('class', 'cursor-pointer');
+                labelGroup.onclick = (e) => {
+                    e.stopPropagation();
+                    inspectEdge(edge);
+                };
+                labelGroup.innerHTML = `
+                    <rect x="${lx - badgeWidth / 2}" y="${ly - 11}" width="${badgeWidth}" height="22" rx="6"
+                          fill="#090d16" stroke="${edge.color}" stroke-width="1.5" />
+                    <text x="${lx}" y="${ly + 4}" text-anchor="middle" fill="#f8fafc" font-family="JetBrains Mono, monospace" font-weight="600" font-size="10.2">
+                        ${edge.protocol}
+                    </text>
+                `;
+                edgeLabelsLayer.appendChild(labelGroup);
+            });
+
+            // 3. Отрисовка карточек UML-узлов (100% непрозрачная подложка #0d1424)
+            UML_NODES.forEach(node => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('id', `svg-${node.id}`);
+                g.setAttribute('class', `uml-node ${selectedElementId === node.id ? 'active-node' : ''}`);
+                g.onclick = (e) => {
+                    e.stopPropagation();
+                    selectNode(node.id, true);
+                };
+
+                const maxChars = Math.floor((node.w - 26) / 6.3);
+                let specsSvg = '';
+                let currentY = node.y + 82;
+                const maxSpecY = node.y + node.h - 34;
+
+                node.specs.forEach(line => {
+                    if (currentY <= maxSpecY) {
+                        const safeLine = line.length > maxChars ? line.slice(0, maxChars - 1) + '…' : line;
+                        specsSvg += `
+                            <text x="${node.x + 12}" y="${currentY}" fill="#cbd5e1" font-family="JetBrains Mono, monospace" font-size="10.3">
+                                • ${safeLine}
+                            </text>
+                        `;
+                        currentY += 18;
+                    }
+                });
+
+                let chipsSvg = '';
+                let chipX = node.x + 12;
+                const chipY = node.y + node.h - 26;
+                node.abbrs.forEach(abbr => {
+                    const chipW = abbr.length * 7.1 + 16;
+                    if (chipX + chipW <= node.x + node.w - 8) {
+                        chipsSvg += `
+                            <g class="abbr-chip" onclick="event.stopPropagation(); showAbbrBubble('${abbr}', event)">
+                                <rect x="${chipX}" y="${chipY}" width="${chipW}" height="19" rx="4" 
+                                      fill="#0f172a" stroke="${node.color}" stroke-width="1.2" />
+                                <text x="${chipX + chipW / 2}" y="${chipY + 13}" text-anchor="middle" 
+                                      fill="${node.color}" font-family="JetBrains Mono, monospace" font-weight="700" font-size="10">
+                                    ${abbr}
+                                </text>
+                            </g>
+                        `;
+                        chipX += chipW + 6;
+                    }
+                });
+
+                const compIconX = node.x + node.w - 26;
+                const compIconY = node.y + 10;
+
+                g.innerHTML = `
+                    <rect class="node-bg" x="${node.x}" y="${node.y}" width="${node.w}" height="${node.h}" rx="10"
+                          fill="#0d1424" stroke="${node.color}" stroke-width="2" />
+                    <g clip-path="url(#clip-${node.id})">
+                        <rect x="${node.x}" y="${node.y}" width="${node.w}" height="62" fill="#111c33" />
+                        <path d="M ${node.x} ${node.y + 62} L ${node.x + node.w} ${node.y + 62}" stroke="#1e293b" stroke-width="1.5" />
+                        <rect x="${compIconX}" y="${compIconY}" width="15" height="19" rx="2" fill="none" stroke="${node.color}" stroke-width="1.5"/>
+                        <rect x="${compIconX - 4}" y="${compIconY + 4}" width="7" height="4" fill="#0d1424" stroke="${node.color}" stroke-width="1.2"/>
+                        <rect x="${compIconX - 4}" y="${compIconY + 11}" width="7" height="4" fill="#0d1424" stroke="${node.color}" stroke-width="1.2"/>
+                        <text x="${node.x + 12}" y="${node.y + 18}" fill="${node.color}" font-family="JetBrains Mono, monospace" font-size="10">
+                            ${node.stereotype}
+                        </text>
+                        <text x="${node.x + 12}" y="${node.y + 37}" fill="#ffffff" font-family="Inter, sans-serif" font-weight="700" font-size="13">
+                            ${node.title}
+                        </text>
+                        <text x="${node.x + 12}" y="${node.y + 53}" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="10.3">
+                            ${node.subtitle}
+                        </text>
+                        ${specsSvg}
+                        ${chipsSvg}
+                    </g>
+                `;
+                nodesLayer.appendChild(g);
+            });
+        }
+
+        function buildOrthogonalPath(pts) {
+            if (!pts || pts.length === 0) return '';
+            let d = `M ${pts[0][0]} ${pts[0][1]}`;
+            for (let i = 1; i < pts.length; i++) {
+                d += ` L ${pts[i][0]} ${pts[i][1]}`;
+            }
+            return d;
+        }
+
+        // =========================================================================================
+        // 8. ИНСПЕКТОР УЗЛОВ И СТЫКОВ + НЕПРОЗРАЧНЫЙ БАББЛ АББРЕВИАТУР
+        // =========================================================================================
+        function selectNode(nodeId, openInspectorPanel = false) {
+            selectedElementId = nodeId;
+            document.querySelectorAll('.uml-node').forEach(el => el.classList.remove('active-node'));
+            const activeSvg = document.getElementById(`svg-${nodeId}`);
+            if (activeSvg) activeSvg.classList.add('active-node');
+
+            const node = UML_NODES.find(n => n.id === nodeId);
+            if (!node) return;
+
+            const nodeIdx = UML_NODES.findIndex(n => n.id === nodeId) + 1;
+            const stepperTitle = document.getElementById('s25-stepper-title');
+            if (stepperTitle) {
+                stepperTitle.textContent = `[${nodeIdx}/${UML_NODES.length}] ${node.title}`;
+            }
+
+            if (openInspectorPanel && currentInterfaceMode === 'desktop' && !isRightInspectorOpen) {
+                toggleRightInspector(true);
+            }
+
+            const zoneObj = UML_ZONES.find(z => z.id === node.zone);
+            const connectedEdges = UML_EDGES.filter(e => e.from === node.id || e.to === node.id);
+
+            const html = `
+                <div class="border-b border-slate-800 pb-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">${node.stereotype}</span>
+                        <button onclick="if(currentInterfaceMode==='s25'){setS25ViewMode('canvas');toggleMobileInspectorSheet(false);} focusNode('${node.id}')" class="text-[10px] font-mono px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 transition">Навести 2D-камеру ⌖</button>
+                    </div>
+                    <h3 class="text-base font-bold text-white mt-2">${node.title}</h3>
+                    <p class="text-xs font-mono text-cyan-400 mt-0.5">${node.subtitle}</p>
+                    <div onclick="if(currentInterfaceMode==='s25'){selectS25ZoneFilter('${node.zone}');toggleMobileInspectorSheet(false);}else{focusZone('${node.zone}');}" class="mt-2 text-[11px] font-mono text-slate-300 solid-bg-card hover:bg-slate-800 p-2 rounded-lg border border-slate-800 cursor-pointer transition">
+                        Зона ЦОД: <span class="text-cyan-300 underline">${zoneObj ? zoneObj.code : ''}</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold mb-1.5">Инженерное описание</h4>
+                    <p class="text-xs text-slate-200 leading-relaxed solid-bg-card p-3 rounded-xl border border-slate-800">${node.details}</p>
+                </div>
+
+                <div>
+                    <h4 class="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-semibold mb-1.5">Технические параметры и сайзинг</h4>
+                    <ul class="space-y-1.5 text-xs font-mono text-slate-200 solid-bg-card p-3 rounded-xl border border-slate-800">
+                        ${node.specs.map(s => `<li class="flex items-start gap-2"><span class="text-cyan-400">▸</span><span>${s}</span></li>`).join('')}
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-[11px] font-mono uppercase tracking-wider text-amber-400 font-semibold mb-1.5">Аббревиатуры узла ()</h4>
+                    <div class="flex flex-wrap gap-1.5">
+                        ${node.abbrs.map(a => `
+                            <button onclick="showAbbrBubble('${a}', event)" class="px-2.5 py-1 rounded-lg solid-bg-card hover:bg-cyan-950 border border-cyan-500/40 text-xs font-mono font-semibold text-cyan-300 transition flex items-center gap-1">
+                                <span>${a}</span>
+                                <span class="text-[10px] text-emerald-400">ⓘ</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-[11px] font-mono uppercase tracking-wider text-purple-400 font-semibold mb-1.5">Сетевые стыки и протоколы (${connectedEdges.length})</h4>
+                    <div class="space-y-2">
+                        ${connectedEdges.map(e => {
+                            const isOut = e.from === node.id;
+                            const peerId = isOut ? e.to : e.from;
+                            const peerNode = UML_NODES.find(n => n.id === peerId);
+                            return `
+                                <div onclick="inspectEdgeById('${e.id}')" class="p-2.5 rounded-xl solid-bg-card hover:bg-slate-800 border border-slate-800 cursor-pointer transition">
+                                    <div class="flex items-center justify-between text-[10px] font-mono">
+                                        <span class="${isOut ? 'text-cyan-400' : 'text-emerald-400'} font-bold">${isOut ? 'ИСХОДЯЩИЙ СТЫК →' : '← ВХОДЯЩИЙ СТЫК'}</span>
+                                        <span class="text-slate-300 truncate max-w-[165px]">${peerNode ? peerNode.title : peerId}</span>
+                                    </div>
+                                    <div class="font-mono font-bold text-xs text-white mt-1">${e.protocol}</div>
+                                    <div class="text-[11px] text-slate-300 mt-1 leading-snug">${e.desc}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('inspector-content').innerHTML = html;
+            document.getElementById('mobile-inspector-body').innerHTML = html;
+
+            if (currentInterfaceMode === 's25' && openInspectorPanel) {
+                toggleMobileInspectorSheet(true);
+            }
+        }
+
+        function inspectEdgeById(edgeId) {
+            const edge = UML_EDGES.find(e => e.id === edgeId);
+            if (edge) inspectEdge(edge);
+        }
+
+        function inspectEdge(edge) {
+            if (currentInterfaceMode === 'desktop' && !isRightInspectorOpen) {
+                toggleRightInspector(true);
+            }
+            const fromNode = UML_NODES.find(n => n.id === edge.from);
+            const toNode = UML_NODES.find(n => n.id === edge.to);
+
+            const html = `
+                <div class="border-b border-slate-800 pb-3">
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">СЕТЕВОЙ СТЫК / ПРОТОКОЛ UML</span>
+                    <h3 class="text-base font-mono font-bold text-white mt-2">${edge.protocol}</h3>
+                    <p class="text-xs text-slate-400 mt-1">Категория потока: <span class="text-cyan-300 font-mono font-bold">${edge.category}</span></p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-2 solid-bg-card p-3 rounded-xl border border-slate-800 text-xs font-mono">
+                    <div>
+                        <span class="text-slate-400">ИСТОЧНИК (FROM):</span>
+                        <div onclick="selectNode('${fromNode.id}', true)" class="text-cyan-300 font-semibold cursor-pointer hover:underline mt-0.5">${fromNode ? fromNode.title : edge.from}</div>
+                    </div>
+                    <div class="text-center text-slate-500">▼</div>
+                    <div>
+                        <span class="text-slate-400">НАЗНАЧЕНИЕ (TO):</span>
+                        <div onclick="selectNode('${toNode.id}', true)" class="text-emerald-300 font-semibold cursor-pointer hover:underline mt-0.5">${toNode ? toNode.title : edge.to}</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold mb-1.5">Спецификация стыка и защита от потерь</h4>
+                    <p class="text-xs text-slate-200 leading-relaxed solid-bg-card p-3 rounded-xl border border-slate-800">${edge.desc}</p>
+                </div>
+            `;
+
+            document.getElementById('inspector-content').innerHTML = html;
+            document.getElementById('mobile-inspector-body').innerHTML = html;
+            if (currentInterfaceMode === 's25') {
+                toggleMobileInspectorSheet(true);
+            }
+        }
+
+        function toggleMobileInspectorSheet(show) {
+            const sheet = document.getElementById('mobile-bottom-sheet');
+            const backdrop = document.getElementById('mobile-sheet-backdrop');
+            if (show) {
+                sheet.classList.remove('hidden');
+                backdrop.classList.remove('hidden');
+            } else {
+                sheet.classList.add('hidden');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        // Показ непрозрачного интерактивного баббла аббревиатуры
+        function showAbbrBubble(code, event) {
+            if (event) event.stopPropagation();
+            const item = ABBR_DICTIONARY[code] || ABBR_DICTIONARY[Object.keys(ABBR_DICTIONARY).find(k => k.toLowerCase() === code.toLowerCase())];
+            if (!item) return;
+
+            const bubble = document.getElementById('abbr-bubble');
+            document.getElementById('bubble-code').textContent = code;
+            document.getElementById('bubble-domain').textContent = item.domain;
+            document.getElementById('bubble-full').textContent = item.full;
+            document.getElementById('bubble-desc').textContent = item.desc;
+            document.getElementById('bubble-link-title').textContent = item.sourceTitle;
+            document.getElementById('bubble-link-url').href = item.url;
+
+            bubble.classList.remove('hidden');
+
+            const bw = Math.min(360, window.innerWidth - 24);
+            const bh = 250;
+            let x = event ? (event.clientX || (event.touches && event.touches[0].clientX) || window.innerWidth / 2) : window.innerWidth / 2 - bw / 2;
+            let y = event ? (event.clientY || (event.touches && event.touches[0].clientY) || window.innerHeight / 3) : window.innerHeight / 3;
+
+            if (x + bw + 14 > window.innerWidth) x = window.innerWidth - bw - 14;
+            if (x < 12) x = 12;
+            if (y + bh + 20 > window.innerHeight) y = Math.max(64, y - bh - 16);
+            if (y < 60) y = 60;
+
+            bubble.style.left = `${x}px`;
+            bubble.style.top = `${y}px`;
+        }
+
+        function hideAbbrBubble() {
+            document.getElementById('abbr-bubble').classList.add('hidden');
+        }
+
+        // =========================================================================================
+        // 9. УПРАВЛЕНИЕ 2D-КАМЕРОЙ И ФОКУСИРОВКОЙ
+        // =========================================================================================
+        function updateCameraTransform() {
+            cameraGroup.setAttribute('transform', `translate(${camX}, ${camY}) scale(${camScale})`);
+        }
+
+        function zoomCamera(factor, centerX, centerY) {
+            const rect = svgStageEl.getBoundingClientRect();
+            const cx = centerX !== undefined ? centerX : rect.width / 2;
+            const cy = centerY !== undefined ? centerY : rect.height / 2;
+
+            const newScale = Math.min(Math.max(camScale * factor, 0.15), 2.2);
+            const scaleRatio = newScale / camScale;
+
+            camX = cx - (cx - camX) * scaleRatio;
+            camY = cy - (cy - camY) * scaleRatio;
+            camScale = newScale;
+            updateCameraTransform();
+        }
+
+        function fitDiagramToScreen(forceFullOverview = false) {
+            const rect = svgStageEl.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+
+            activeZoneId = null;
+            renderZonesSidebar();
+            renderUMLDiagram();
+
+            const padX = currentInterfaceMode === 's25' ? 10 : 18;
+            const padTop = currentInterfaceMode === 's25' ? 48 : 14;
+            const padBottom = currentInterfaceMode === 's25' ? 120 : 56;
+
+            const availW = Math.max(rect.width - padX * 2, 160);
+            const availH = Math.max(rect.height - padTop - padBottom, 160);
+
+            const scaleX = availW / DIAGRAM_W;
+            const scaleY = availH / DIAGRAM_H;
+            const targetScale = Math.min(scaleX, scaleY);
+            const targetX = (rect.width - DIAGRAM_W * targetScale) / 2;
+            const targetY = padTop + (availH - DIAGRAM_H * targetScale) / 2;
+
+            animateCameraTo(targetX, targetY, targetScale, 260);
+        }
+
+        function focusReadableCore() {
+            const rect = svgStageEl.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+
+            activeZoneId = null;
+            renderZonesSidebar();
+            renderUMLDiagram();
+
+            if (currentInterfaceMode === 's25') {
+                focusNode('n_services');
+            } else {
+                const targetScale = Math.min((rect.width - 40) / 1950, (rect.height - 60) / 1150);
+                const targetX = rect.width / 2 - 1250 * targetScale;
+                const targetY = (rect.height - 30) / 2 - 1380 * targetScale;
+                animateCameraTo(targetX, targetY, targetScale, 280);
+            }
+        }
+
+        function focusZone(zoneId, updateNav = true) {
+            const z = UML_ZONES.find(item => item.id === zoneId);
+            if (!z) return;
+
+            activeZoneId = zoneId;
+            if (updateNav) {
+                renderZonesSidebar();
+                renderUMLDiagram();
+            }
+
+            const rect = svgStageEl.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+
+            if (currentInterfaceMode === 's25') {
+                const firstNode = UML_NODES.find(n => n.zone === zoneId);
+                if (firstNode) focusNode(firstNode.id);
+            } else {
+                const padX = 28;
+                const padY = 56;
+                const scaleX = (rect.width - padX * 2) / z.w;
+                const scaleY = (rect.height - padY * 2) / (z.h + 180);
+                const targetScale = Math.min(scaleX, scaleY, 0.85);
+                const targetX = rect.width / 2 - (z.x + z.w / 2) * targetScale;
+                const targetY = (rect.height - 24) / 2 - (z.y + z.h / 2) * targetScale;
+                animateCameraTo(targetX, targetY, targetScale, 280);
+            }
+        }
+
+        function focusNode(nodeId) {
+            const n = UML_NODES.find(item => item.id === nodeId);
+            if (!n) return;
+
+            activeZoneId = n.zone;
+            renderZonesSidebar();
+            renderUMLDiagram();
+            selectNode(nodeId, false);
+
+            const rect = svgStageEl.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+
+            if (currentInterfaceMode === 's25') {
+                // В 2D-режиме на S25 вписываем выбранную карточку на 88% ширины экрана смартфона
+                const targetScale = Math.min((rect.width - 28) / n.w, 0.78);
+                const targetX = rect.width / 2 - (n.x + n.w / 2) * targetScale;
+                const targetY = (rect.height - 70) / 2 - (n.y + n.h / 2) * targetScale;
+                animateCameraTo(targetX, targetY, targetScale, 260);
+            } else {
+                const maxScaleByWidth = (rect.width - 80) / (n.w * 1.45);
+                const maxScaleByHeight = (rect.height - 100) / (n.h * 1.75);
+                const targetScale = Math.min(maxScaleByWidth, maxScaleByHeight, 0.72);
+                const targetX = rect.width / 2 - (n.x + n.w / 2) * targetScale;
+                const targetY = (rect.height - 28) / 2 - (n.y + n.h / 2 - 20) * targetScale;
+                animateCameraTo(targetX, targetY, targetScale, 280);
+            }
+        }
+
+        // Обработчики мыши и Touch-жестов для 2D-холста
+        svgStageEl.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return;
+            if (animFrameId) {
+                cancelAnimationFrame(animFrameId);
+                animFrameId = null;
+            }
+            isDraggingCanvas = true;
+            dragStartX = e.clientX - camX;
+            dragStartY = e.clientY - camY;
+            hideAbbrBubble();
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDraggingCanvas) return;
+            camX = e.clientX - dragStartX;
+            camY = e.clientY - dragStartY;
+            updateCameraTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingCanvas = false;
+        });
+
+        svgStageEl.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (animFrameId) {
+                cancelAnimationFrame(animFrameId);
+                animFrameId = null;
+            }
+            const rect = svgStageEl.getBoundingClientRect();
+            const factor = e.deltaY < 0 ? 1.14 : 0.88;
+            zoomCamera(factor, e.clientX - rect.left, e.clientY - rect.top);
+        }, { passive: false });
+
+        let lastTouchDist = 0;
+        svgStageEl.addEventListener('touchstart', (e) => {
+            if (animFrameId) {
+                cancelAnimationFrame(animFrameId);
+                animFrameId = null;
+            }
+            if (e.touches.length === 1) {
+                isDraggingCanvas = true;
+                dragStartX = e.touches[0].clientX - camX;
+                dragStartY = e.touches[0].clientY - camY;
+            } else if (e.touches.length === 2) {
+                isDraggingCanvas = false;
+                lastTouchDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+            }
+        }, { passive: true });
+
+        svgStageEl.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1 && isDraggingCanvas) {
+                camX = e.touches[0].clientX - dragStartX;
+                camY = e.touches[0].clientY - dragStartY;
+                updateCameraTransform();
+            } else if (e.touches.length === 2) {
+                const dist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                if (lastTouchDist > 0) {
+                    const rect = svgStageEl.getBoundingClientRect();
+                    const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+                    const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+                    zoomCamera(dist / lastTouchDist, centerX, centerY);
+                }
+                lastTouchDist = dist;
+            }
+        }, { passive: true });
+
+        svgStageEl.addEventListener('touchend', () => {
+            isDraggingCanvas = false;
+            lastTouchDist = 0;
+        });
+
+        // =========================================================================================
+        // 10. НАВИГАЦИЯ ПО ЗОНАМ, ФИЛЬТРЫ СЛОЕВ, ПОИСК, ГЛОССАРИЙ И КАЛЬКУЛЯТОР САЙЗИНГА
+        // =========================================================================================
+        function renderZonesSidebar() {
+            const list = document.getElementById('zones-nav-list');
+            if (!list) return;
+            list.innerHTML = UML_ZONES.map((z, idx) => {
+                const isSelected = activeZoneId === z.id;
+                const shortLabel = idx === 0 ? 'Внешний контур & Зона 7' : `Зона ${idx}: ${z.code.split(':')[1] || z.code}`;
+                return `
+                    <button onclick="focusZone('${z.id}')" class="w-full text-left p-2 rounded-lg ${isSelected ? 'bg-cyan-950 border-cyan-400 ring-1 ring-cyan-400/50' : 'solid-bg-card hover:bg-slate-800 border-slate-800 hover:border-cyan-500/40'} border transition flex items-center justify-between group">
+                        <div class="truncate pr-2">
+                            <div class="font-mono font-semibold text-[11px] ${isSelected ? 'text-cyan-300' : 'text-white group-hover:text-cyan-300'} truncate">${shortLabel}</div>
+                            <div class="text-[10px] text-slate-400 truncate">${z.title}</div>
+                        </div>
+                        <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${z.stroke}"></span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function setLayerFilter(category) {
+            currentLayerFilter = category;
+            ['ALL', 'INGEST', 'SOAR', 'HA', 'REG'].forEach(cat => {
+                const btn = document.getElementById(`filter-${cat}`);
+                if (!btn) return;
+                if (cat === category) {
+                    btn.className = 'px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-medium whitespace-nowrap';
+                } else {
+                    btn.className = 'px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap';
+                }
+            });
+            renderUMLDiagram();
+        }
+
+        function toggleFlowAnimation() {
+            flowAnimEnabled = !flowAnimEnabled;
+            const btn = document.getElementById('btn-toggle-anim');
+            if (flowAnimEnabled) {
+                btn.innerHTML = '<span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span><span class="hidden sm:inline">Потоки: ВКЛ</span>';
+                btn.className = 'px-2.5 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-mono text-xs transition flex items-center gap-1.5';
+            } else {
+                btn.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-500"></span><span class="hidden sm:inline">Потоки: ВЫКЛ</span>';
+                btn.className = 'px-2.5 h-8 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 font-mono text-xs transition flex items-center gap-1.5';
+            }
+            renderUMLDiagram();
+        }
+
+        // Поиск в шапке
+        const searchInput = document.getElementById('global-search');
+        const searchDropdown = document.getElementById('search-dropdown');
+
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.trim().toLowerCase();
+            if (!q) {
+                searchDropdown.classList.add('hidden');
+                return;
+            }
+
+            const matchedAbbrs = Object.entries(ABBR_DICTIONARY).filter(([code, obj]) =>
+                code.toLowerCase().includes(q) || obj.full.toLowerCase().includes(q) || obj.desc.toLowerCase().includes(q)
+            ).slice(0, 6);
+
+            const matchedNodes = UML_NODES.filter(n =>
+                n.title.toLowerCase().includes(q) || n.subtitle.toLowerCase().includes(q) || n.details.toLowerCase().includes(q)
+            ).slice(0, 5);
+
+            if (matchedAbbrs.length === 0 && matchedNodes.length === 0) {
+                searchDropdown.innerHTML = `<div class="p-3 text-xs font-mono text-slate-400">Ничего не найдено по запросу "${q}"</div>`;
+            } else {
+                let html = '';
+                matchedAbbrs.forEach(([code, obj]) => {
+                    html += `
+                        <div onclick="showAbbrBubble('${code}', event); searchDropdown.classList.add('hidden');" class="p-2.5 hover:bg-slate-800 cursor-pointer transition">
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono font-bold text-xs text-cyan-300">${code}</span>
+                                <span class="text-[10px] font-mono text-emerald-400">Аббревиатура ⓘ</span>
+                            </div>
+                            <div class="text-[11px] text-slate-300 truncate">${obj.full}</div>
+                        </div>
+                    `;
+                });
+                matchedNodes.forEach(n => {
+                    html += `
+                        <div onclick="focusNode('${n.id}'); searchDropdown.classList.add('hidden');" class="p-2.5 hover:bg-slate-800 cursor-pointer transition">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-white">${n.title}</span>
+                                <span class="text-[10px] font-mono text-purple-400">Узел UML ⌖</span>
+                            </div>
+                            <div class="text-[11px] font-mono text-slate-400 truncate">${n.subtitle}</div>
+                        </div>
+                    `;
+                });
+                searchDropdown.innerHTML = html;
+            }
+            searchDropdown.classList.remove('hidden');
+        });
+
+        // Модальные окна (Глоссарий и Сайзинг)
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            if (id === 'glossary-modal') renderGlossaryModal('');
+            if (id === 'calc-modal') runSizingCalculator();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        document.getElementById('glossary-filter-input').addEventListener('input', (e) => {
+            renderGlossaryModal(e.target.value.trim().toLowerCase());
+        });
+
+        function renderGlossaryModal(query) {
+            const grid = document.getElementById('glossary-grid');
+            const entries = Object.entries(ABBR_DICTIONARY).filter(([code, item]) => {
+                if (!query) return true;
+                return code.toLowerCase().includes(query) ||
+                       item.full.toLowerCase().includes(query) ||
+                       item.domain.toLowerCase().includes(query) ||
+                       item.desc.toLowerCase().includes(query);
+            });
+
+            grid.innerHTML = entries.map(([code, item]) => `
+                <div class="solid-bg-card border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="font-mono font-bold text-sm text-cyan-300">${code}</span>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-emerald-300 border border-slate-700">${item.domain}</span>
+                        </div>
+                        <div class="text-xs font-semibold text-white mt-1">${item.full}</div>
+                        <p class="text-xs text-slate-300 mt-2 leading-relaxed">${item.desc}</p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono">
+                        <span class="text-emerald-400">✓ HTTP 200 OK</span>
+                        <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline truncate max-w-[230px]">${item.sourceTitle} ↗</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Инженерный калькулятор сайзинга по формулам документа
+        function setQuickEps(val) {
+            document.getElementById('calc-eps').value = val;
+            runSizingCalculator();
+        }
+
+        function runSizingCalculator() {
+            const eps = Math.max(100, Number(document.getElementById('calc-eps').value) || 25000);
+            const sizeAvg = Math.max(100, Number(document.getElementById('calc-size').value) || 600);
+            const retention = Math.max(7, Number(document.getElementById('calc-days').value) || 90);
+            const cRatio = Number(document.getElementById('calc-compression').value) || 6;
+
+            // Формула 1: Bandwidth = (EPS * Size_avg * 8 / 10^6) * k_burst
+            const bwNominal = (eps * sizeAvg * 8) / 1e6;
+            const bwBurst = bwNominal * 2.5;
+
+            // Формула 2: Volume_daily = (EPS * 86400 * Size_avg) / 10^12 [ТБ/сутки]
+            const volDailyTb = (eps * 86400 * sizeAvg) / 1e12;
+
+            // Формула 3: Storage_usable = Volume_daily * Retention * (1 / C_ratio) * R_factor * k_margin
+            const rFactor = 2;
+            const kMargin = 1.30;
+            const usableStorageTb = volDailyTb * retention * (1 / cRatio) * rFactor * kMargin;
+
+            // Вычислительные ресурсы
+            const vectorCores = Math.max(4, Math.ceil(eps / 2000));
+            const kafkaBrokers = eps >= 60000 ? 5 : 3;
+            const chShards = eps >= 60000 ? 6 : (eps >= 20000 ? 2 : 1);
+            const chDataNodes = chShards * 2;
+
+            const resultsGrid = document.getElementById('calc-results-grid');
+            resultsGrid.innerHTML = `
+                <div class="solid-bg-card p-3.5 rounded-xl border border-cyan-500/30">
+                    <div class="text-[10px] font-mono text-cyan-400 uppercase">Полоса приема (Bandwidth)</div>
+                    <div class="text-lg font-mono font-bold text-white mt-1">${bwNominal.toFixed(0)} – ${bwBurst.toFixed(0)} Мбит/с</div>
+                    <div class="text-[11px] font-mono text-slate-400 mt-1">Сырой поток: <span class="text-slate-200">${volDailyTb.toFixed(2)} ТБ/сутки</span></div>
+                </div>
+                <div class="solid-bg-card p-3.5 rounded-xl border border-emerald-500/30">
+                    <div class="text-[10px] font-mono text-emerald-400 uppercase">Полезная емкость СХД</div>
+                    <div class="text-lg font-mono font-bold text-white mt-1">${usableStorageTb.toFixed(1)} ТБ NVMe/SAS</div>
+                    <div class="text-[11px] font-mono text-slate-400 mt-1">Учтены R_factor=2 и запас 30% (merges)</div>
+                </div>
+                <div class="solid-bg-card p-3.5 rounded-xl border border-amber-500/30">
+                    <div class="text-[10px] font-mono text-amber-400 uppercase">Конвейер Kafka + Vector</div>
+                    <div class="text-lg font-mono font-bold text-white mt-1">${kafkaBrokers} брокера • ${vectorCores} vCPU</div>
+                    <div class="text-[11px] font-mono text-slate-400 mt-1">Кворум KRaft + нормализация логов</div>
+                </div>
+                <div class="solid-bg-card p-3.5 rounded-xl border border-rose-500/30">
+                    <div class="text-[10px] font-mono text-rose-400 uppercase">Кластер ClickHouse + Keeper</div>
+                    <div class="text-lg font-mono font-bold text-white mt-1">${chDataNodes} Data + 3 Keeper</div>
+                    <div class="text-[11px] font-mono text-slate-400 mt-1">${chShards} шард(а) × 2 реплики + 3 узла Raft</div>
+                </div>
+            `;
+        }
+
+        // Закрытие всплывающих элементов по клику вне или клавише Escape
+        window.addEventListener('click', (e) => {
+            const bubble = document.getElementById('abbr-bubble');
+            if (!bubble.contains(e.target)) {
+                hideAbbrBubble();
+            }
+            if (!searchDropdown.contains(e.target) && e.target !== searchInput) {
+                searchDropdown.classList.add('hidden');
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                hideAbbrBubble();
+                closeModal('glossary-modal');
+                closeModal('calc-modal');
+                if (currentInterfaceMode === 'desktop' && isRightInspectorOpen) {
+                    toggleRightInspector(false);
+                } else if (currentInterfaceMode === 's25') {
+                    toggleMobileInspectorSheet(false);
+                }
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (currentInterfaceMode === 'desktop') {
+                if (activeZoneId) focusZone(activeZoneId, false);
+                else fitDiagramToScreen(true);
+            }
+        });
+
+        // Инициализация при загрузке
+        window.onload = () => {
+            renderZonesSidebar();
+            renderUMLDiagram();
+            renderS25VerticalUML();
+            detectAndApplyDeviceMode();
+            selectNode('n_services', false);
+        };
+    </script>
+</body>
+</html>
