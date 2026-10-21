@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="ru" class="dark">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>SOC Security Vision 5 — Интерактивная UML 2.5 Архитектура ЦОД</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Инженерные шрифты Inter и JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -41,25 +44,31 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
+
         body {
             background-color: #060a12;
             color: #f8fafc;
             overflow: hidden;
             user-select: none;
         }
+
         /* Гарантированно непрозрачные фоны для исключения просвечивания текста */
         .solid-bg-main {
             background-color: #060a12 !important;
         }
+
         .solid-bg-panel {
             background-color: #0b1120 !important;
         }
+
         .solid-bg-card {
             background-color: #0f172a !important;
         }
+
         .solid-bg-elevated {
             background-color: #131c31 !important;
         }
+
         /* Инженерная миллиметровая CAD-сетка */
         .cad-grid {
             background-color: #060a12;
@@ -70,61 +79,76 @@
                 linear-gradient(to bottom, rgba(6, 182, 212, 0.08) 1px, transparent 1px);
             background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
         }
+
         /* Кастомные скроллбары */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
+
         ::-webkit-scrollbar-track {
             background: #060a12;
         }
+
         ::-webkit-scrollbar-thumb {
             background: #1e293b;
             border-radius: 4px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: #06b6d4;
         }
+
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
+
         .no-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
         /* Анимация потоков данных по линиям UML */
         @keyframes packetFlow {
             to {
                 stroke-dashoffset: -28;
             }
         }
+
         .uml-edge-animated {
             stroke-dasharray: 8 6;
             animation: packetFlow 0.85s linear infinite;
         }
+
         .uml-edge-static {
             stroke-dasharray: none;
         }
+
         /* Стили узлов UML */
         .uml-node {
             transition: filter 0.18s ease;
             cursor: pointer;
         }
+
         .uml-node:hover {
             filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.45));
         }
+
         .uml-node.active-node .node-bg {
             stroke-width: 3.5px !important;
             filter: drop-shadow(0 0 16px rgba(34, 211, 238, 0.65));
         }
+
         /* Стили чипов аббревиатур */
         .abbr-chip {
             cursor: pointer;
             transition: all 0.15s ease;
         }
+
         .abbr-chip:hover {
             filter: brightness(1.25);
         }
+
         /* Рамка эмулятора  на десктопе */
         .s25-frame-emulator {
             width: 412px !important;
@@ -139,39 +163,143 @@
             flex: none !important;
             background-color: #060a12 !important;
         }
+
         /* Пульсация выбранной сетевой зоны */
         @keyframes zonePulse {
-            0%, 100% { stroke-opacity: 1; filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.5)); }
-            50% { stroke-opacity: 0.65; filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.2)); }
+
+            0%,
+            100% {
+                stroke-opacity: 1;
+                filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.5));
+            }
+
+            50% {
+                stroke-opacity: 0.65;
+                filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.2));
+            }
         }
+
         .active-zone-rect {
             stroke-width: 3.2px !important;
             stroke-dasharray: none !important;
             animation: zonePulse 2s ease-in-out infinite;
         }
+
+        /* --- Исправление высоты и предотвращение скролла страницы на Android --- */
+        html,
+        body {
+            height: 100% !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            /* Динамический вьюпорт для Chrome и Firefox Android */
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            position: fixed !important;
+            width: 100% !important;
+        }
+
+        /* --- Верхняя панель: убираем весь текст с подложки на мобильных устройствах --- */
+        @media (max-width: 768px) {
+
+            /* Скрываем заголовки, параграфы и текстовые блоки в шапке */
+            header h1,
+            header h2,
+            header h3,
+            header p,
+            header span:not(.icon),
+            .header h1,
+            .header h2,
+            .header p,
+            .header span:not(.icon),
+            .top-bar h1,
+            .top-bar h2,
+            .top-bar p,
+            .top-bar span:not(.icon),
+            #header h1,
+            #header h2,
+            #header p,
+            #header span:not(.icon) {
+                display: none !important;
+            }
+
+            /* Делаем саму подложку прозрачной, чтобы не перекрывала схему */
+            header,
+            .header,
+            .top-bar,
+            #header {
+                background: transparent !important;
+                box-shadow: none !important;
+                border: none !important;
+                pointer-events: none !important;
+            }
+
+            /* Оставляем кликабельными только кнопки управления */
+            header button,
+            header .btn,
+            header a,
+            .header button,
+            .header .btn,
+            .header a,
+            .top-bar button,
+            .top-bar .btn,
+            .top-bar a,
+            #header button,
+            #header .btn,
+            #header a {
+                pointer-events: auto !important;
+            }
+        }
+
+        /* --- Нижняя панель: фиксация видимости над системными оверлеями --- */
+        footer,
+        .footer,
+        .bottom-bar,
+        .toolbar-bottom,
+        #controls,
+        .controls-panel {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            z-index: 9999 !important;
+            /* Учет шторки жестов Android и адресной строки */
+            padding-bottom: max(14px, env(safe-area-inset-bottom)) !important;
+            box-sizing: border-box !important;
+            transform: translateZ(0) !important;
+            /* Устраняет моргание и исчезновение при отрисовке */
+        }
     </style>
 </head>
+
 <body class="h-screen w-screen flex flex-col font-sans antialiased overflow-hidden solid-bg-main">
 
     <!-- ВЕРХНЯЯ ИНЖЕНЕРНАЯ ПАНЕЛЬ НАВИГАЦИИ -->
-    <header id="app-header" class="min-h-[52px] py-1.5 solid-bg-panel border-b border-slate-800 px-3 lg:px-4 flex items-center justify-between gap-2 z-30 shrink-0">
+    <header id="app-header"
+        class="min-h-[52px] py-1.5 solid-bg-panel border-b border-slate-800 px-3 lg:px-4 flex items-center justify-between gap-2 z-30 shrink-0">
         <!-- Лого и статус системы -->
         <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-mono font-bold text-xs shadow-inner shrink-0">
+            <div
+                class="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-mono font-bold text-xs shadow-inner shrink-0">
                 SV5
             </div>
             <div class="min-w-0">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                    <h1 class="font-bold text-xs sm:text-sm lg:text-base tracking-tight text-white whitespace-nowrap">SOC SECURITY VISION 5</h1>
-                    <span class="hidden xl:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 whitespace-nowrap">
+                    <h1 class="font-bold text-xs sm:text-sm lg:text-base tracking-tight text-white whitespace-nowrap">
+                        SOC SECURITY VISION 5</h1>
+                    <span
+                        class="hidden xl:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 whitespace-nowrap">
                         UML 2.5 BLUEPRINT
                     </span>
-                    <span id="device-badge" class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 whitespace-nowrap">
+                    <span id="device-badge"
+                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 whitespace-nowrap">
                         AUTO: DESKTOP
                     </span>
                 </div>
                 <p class="text-[10px] text-slate-400 font-mono truncate hidden lg:block">
-                    7 зон TCVN 11930:2017 (Cấp độ 3–5) • 18 узлов • 25 верифицированных стыков • 45 интерактивных аббревиатур
+                    7 зон TCVN 11930:2017 (Cấp độ 3–5) • 18 узлов • 25 верифицированных стыков • 45 интерактивных
+                    аббревиатур
                 </p>
             </div>
         </div>
@@ -180,33 +308,57 @@
         <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <!-- Глобальный поиск по аббревиатурам и узлам -->
             <div class="relative hidden sm:block w-44 md:w-56 lg:w-64">
-                <input id="global-search" type="text" placeholder="Поиск: SIEM, KRaft, RELP, NCSC..." 
+                <input id="global-search" type="text" placeholder="Поиск: SIEM, KRaft, RELP, NCSC..."
                     class="w-full solid-bg-main border border-slate-700 focus:border-cyan-400 rounded-lg pl-7 pr-2.5 py-1 text-xs font-mono text-slate-200 placeholder-slate-500 outline-none transition">
-                <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2 top-2" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <div id="search-dropdown" class="hidden absolute left-0 right-0 mt-1 solid-bg-panel border border-slate-700 rounded-lg shadow-2xl max-h-72 overflow-y-auto z-50 divide-y divide-slate-800"></div>
+                <div id="search-dropdown"
+                    class="hidden absolute left-0 right-0 mt-1 solid-bg-panel border border-slate-700 rounded-lg shadow-2xl max-h-72 overflow-y-auto z-50 divide-y divide-slate-800">
+                </div>
             </div>
 
             <!-- Кнопки модальных окон -->
-            <button onclick="openModal('glossary-modal')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono text-cyan-300 flex items-center gap-1.5 transition shrink-0" title="Полный справочник аббревиатур и валидатор ссылок">
-                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            <button onclick="openModal('glossary-modal')"
+                class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono text-cyan-300 flex items-center gap-1.5 transition shrink-0"
+                title="Полный справочник аббревиатур и валидатор ссылок">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
                 <span class="hidden md:inline whitespace-nowrap">Глоссарий (45)</span>
             </button>
 
-            <button onclick="openModal('calc-modal')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono text-emerald-300 flex items-center gap-1.5 transition shrink-0" title="Калькулятор сайзинга ЦОД SOC">
-                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            <button onclick="openModal('calc-modal')"
+                class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono text-emerald-300 flex items-center gap-1.5 transition shrink-0"
+                title="Калькулятор сайзинга ЦОД SOC">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
                 <span class="hidden md:inline whitespace-nowrap">Сайзинг EPS</span>
             </button>
 
             <!-- Переключатель режима Desktop / Samsung S25 -->
             <div class="flex items-center solid-bg-main p-0.5 rounded-lg border border-slate-700 shrink-0">
-                <button onclick="switchInterfaceMode('desktop')" id="btn-mode-desktop" class="px-2 py-1 rounded text-[11px] font-mono flex items-center gap-1 transition bg-cyan-500 text-slate-950 font-semibold whitespace-nowrap" title="Режим рабочей станции архитектора (Desktop)">
-                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <button onclick="switchInterfaceMode('desktop')" id="btn-mode-desktop"
+                    class="px-2 py-1 rounded text-[11px] font-mono flex items-center gap-1 transition bg-cyan-500 text-slate-950 font-semibold whitespace-nowrap"
+                    title="Режим рабочей станции архитектора (Desktop)">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
                     <span>Desktop</span>
                 </button>
-                <button onclick="switchInterfaceMode('s25')" id="btn-mode-s25" class="px-2 py-1 rounded text-[11px] font-mono flex items-center gap-1 transition text-slate-400 hover:text-white whitespace-nowrap" title="Мобильный режим">
-                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                <button onclick="switchInterfaceMode('s25')" id="btn-mode-s25"
+                    class="px-2 py-1 rounded text-[11px] font-mono flex items-center gap-1 transition text-slate-400 hover:text-white whitespace-nowrap"
+                    title="Мобильный режим">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
                     <span>Mobile</span>
                 </button>
             </div>
@@ -217,13 +369,18 @@
     <div id="workspace-wrapper" class="flex-1 flex overflow-hidden relative solid-bg-main">
 
         <!-- ЛЕВАЯ БОКОВАЯ ПАНЕЛЬ (ДЛЯ DESKTOP-РЕЖИМА) -->
-        <aside id="left-sidebar" class="w-72 solid-bg-panel border-r border-slate-800 flex flex-col z-20 shrink-0 select-text overflow-y-auto transition-all">
-            <div class="px-3.5 py-2.5 border-b border-slate-800 flex items-center justify-between solid-bg-card sticky top-0 z-10">
+        <aside id="left-sidebar"
+            class="w-72 solid-bg-panel border-r border-slate-800 flex flex-col z-20 shrink-0 select-text overflow-y-auto transition-all">
+            <div
+                class="px-3.5 py-2.5 border-b border-slate-800 flex items-center justify-between solid-bg-card sticky top-0 z-10">
                 <div class="flex items-center gap-1.5">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-cyan-400 font-bold">Навигатор ЦОД (7 зон)</span>
-                    <button onclick="showAbbrBubble('TCVN 11930:2017', event)" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30">TCVN</button>
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-cyan-400 font-bold">Навигатор ЦОД
+                        (7 зон)</span>
+                    <button onclick="showAbbrBubble('TCVN 11930:2017', event)"
+                        class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30">TCVN</button>
                 </div>
-                <button onclick="toggleLeftSidebar(false)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-mono transition">
+                <button onclick="toggleLeftSidebar(false)"
+                    class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-mono transition">
                     ◀ Скрыть
                 </button>
             </div>
@@ -232,7 +389,8 @@
             <div class="p-3 border-b border-slate-800">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[10px] text-slate-400 leading-tight">Клик фокусирует зону целиком:</span>
-                    <button onclick="fitDiagramToScreen(true)" class="text-[10px] font-mono text-cyan-400 hover:underline shrink-0 ml-1">Сброс 100%</button>
+                    <button onclick="fitDiagramToScreen(true)"
+                        class="text-[10px] font-mono text-cyan-400 hover:underline shrink-0 ml-1">Сброс 100%</button>
                 </div>
                 <div id="zones-nav-list" class="space-y-1.5"></div>
             </div>
@@ -240,45 +398,56 @@
             <!-- 3 Домена и 6 Low-Code Конструкторов Security Vision 5 -->
             <div class="p-3 border-b border-slate-800">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-semibold">Домены & 6 Конструкторов</span>
-                    <button onclick="showAbbrBubble('No-Code', event)" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Low-Code</button>
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-semibold">Домены &
+                        6 Конструкторов</span>
+                    <button onclick="showAbbrBubble('No-Code', event)"
+                        class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Low-Code</button>
                 </div>
                 <div class="grid grid-cols-3 gap-1.5 mb-2.5">
-                    <button onclick="showAbbrBubble('SOT', event)" class="p-1.5 rounded solid-bg-card border border-cyan-700/50 text-center hover:border-cyan-400 transition">
+                    <button onclick="showAbbrBubble('SOT', event)"
+                        class="p-1.5 rounded solid-bg-card border border-cyan-700/50 text-center hover:border-cyan-400 transition">
                         <div class="font-mono font-bold text-xs text-cyan-300">SOT</div>
                         <div class="text-[9px] text-slate-400">Операции</div>
                     </button>
-                    <button onclick="showAbbrBubble('SDA', event)" class="p-1.5 rounded solid-bg-card border border-purple-700/50 text-center hover:border-purple-400 transition">
+                    <button onclick="showAbbrBubble('SDA', event)"
+                        class="p-1.5 rounded solid-bg-card border border-purple-700/50 text-center hover:border-purple-400 transition">
                         <div class="font-mono font-bold text-xs text-purple-300">SDA</div>
                         <div class="text-[9px] text-slate-400">Аналитика</div>
                     </button>
-                    <button onclick="showAbbrBubble('SGRC', event)" class="p-1.5 rounded solid-bg-card border border-emerald-700/50 text-center hover:border-emerald-400 transition">
+                    <button onclick="showAbbrBubble('SGRC', event)"
+                        class="p-1.5 rounded solid-bg-card border border-emerald-700/50 text-center hover:border-emerald-400 transition">
                         <div class="font-mono font-bold text-xs text-emerald-300">SGRC</div>
                         <div class="text-[9px] text-slate-400">Комплаенс</div>
                     </button>
                 </div>
                 <div class="space-y-1 text-[11px] text-slate-300 font-mono">
-                    <div onclick="focusNode('n_web')" class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
+                    <div onclick="focusNode('n_web')"
+                        class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
                         <span>1. Конструктор объектов</span>
                         <span class="text-[9px] text-cyan-400">2D/3D Graph</span>
                     </div>
-                    <div onclick="focusNode('n_services')" class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
+                    <div onclick="focusNode('n_services')"
+                        class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
                         <span>2. Workflow Engine</span>
                         <span class="text-[9px] text-emerald-400">Playbooks</span>
                     </div>
-                    <div onclick="focusNode('n_conn_dmz')" class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
+                    <div onclick="focusNode('n_conn_dmz')"
+                        class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
                         <span>3. Конструктор интеграций</span>
                         <span class="text-[9px] text-amber-400">150+ СЗИ</span>
                     </div>
-                    <div onclick="focusNode('n_services')" class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
+                    <div onclick="focusNode('n_services')"
+                        class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
                         <span>4. Редактор отчетов</span>
                         <span class="text-[9px] text-purple-400">PDF/DOCX</span>
                     </div>
-                    <div onclick="focusNode('n_web')" class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
+                    <div onclick="focusNode('n_web')"
+                        class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
                         <span>5. Конструктор BI</span>
                         <span class="text-[9px] text-cyan-400">Dashboards</span>
                     </div>
-                    <div onclick="focusNode('n_web')" class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
+                    <div onclick="focusNode('n_web')"
+                        class="p-1.5 rounded solid-bg-card border border-slate-800 hover:border-cyan-500/50 cursor-pointer flex items-center justify-between">
                         <span>6. Редактор меню и RBAC</span>
                         <span class="text-[9px] text-rose-400">Multi-Tenant</span>
                     </div>
@@ -287,7 +456,8 @@
 
             <!-- Легенда сетевых стыков UML -->
             <div class="p-3">
-                <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold mb-2">Типы сетевых стыков UML</div>
+                <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold mb-2">Типы
+                    сетевых стыков UML</div>
                 <div class="space-y-1.5 text-xs">
                     <div class="flex items-center gap-2">
                         <span class="w-6 h-0.5 bg-cyan-400 inline-block"></span>
@@ -317,51 +487,83 @@
         <main id="canvas-viewport" class="flex-1 cad-grid relative overflow-hidden flex flex-col min-w-0">
 
             <!-- ВЕРХНЯЯ ПАНЕЛЬ ИНСТРУМЕНТОВ ХОЛСТА (ТОЛЬКО ДЛЯ DESKTOP) -->
-            <div id="desktop-canvas-toolbar" class="z-10 solid-bg-panel border-b border-slate-800 px-2.5 py-1.5 flex flex-col gap-1.5 shrink-0">
+            <div id="desktop-canvas-toolbar"
+                class="z-10 solid-bg-panel border-b border-slate-800 px-2.5 py-1.5 flex flex-col gap-1.5 shrink-0">
                 <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-1.5 shrink-0">
-                        <button id="btn-toggle-left" onclick="toggleLeftSidebar()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[10px] font-mono text-cyan-300 flex items-center gap-1 transition whitespace-nowrap">
+                        <button id="btn-toggle-left" onclick="toggleLeftSidebar()"
+                            class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[10px] font-mono text-cyan-300 flex items-center gap-1 transition whitespace-nowrap">
                             <span>◧ Скрыть зоны</span>
                         </button>
 
-                        <div class="flex items-center solid-bg-main p-0.5 rounded-lg border border-slate-800 text-[10px] font-mono overflow-x-auto no-scrollbar">
-                            <button onclick="setLayerFilter('ALL')" id="filter-ALL" class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-medium whitespace-nowrap">Все стыки (25)</button>
-                            <button onclick="setLayerFilter('INGEST')" id="filter-INGEST" class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">Телеметрия</button>
-                            <button onclick="setLayerFilter('SOAR')" id="filter-SOAR" class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">SOAR IR</button>
-                            <button onclick="setLayerFilter('HA')" id="filter-HA" class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">HA/Raft</button>
-                            <button onclick="setLayerFilter('REG')" id="filter-REG" class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">Регуляторы</button>
+                        <div
+                            class="flex items-center solid-bg-main p-0.5 rounded-lg border border-slate-800 text-[10px] font-mono overflow-x-auto no-scrollbar">
+                            <button onclick="setLayerFilter('ALL')" id="filter-ALL"
+                                class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-medium whitespace-nowrap">Все
+                                стыки (25)</button>
+                            <button onclick="setLayerFilter('INGEST')" id="filter-INGEST"
+                                class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">Телеметрия</button>
+                            <button onclick="setLayerFilter('SOAR')" id="filter-SOAR"
+                                class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">SOAR
+                                IR</button>
+                            <button onclick="setLayerFilter('HA')" id="filter-HA"
+                                class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">HA/Raft</button>
+                            <button onclick="setLayerFilter('REG')" id="filter-REG"
+                                class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">Регуляторы</button>
                         </div>
                     </div>
 
-                    <button id="btn-toggle-right" onclick="toggleRightInspector()" class="px-2.5 py-0.5 rounded bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-[10px] font-mono text-cyan-300 flex items-center gap-1 transition whitespace-nowrap shrink-0">
+                    <button id="btn-toggle-right" onclick="toggleRightInspector()"
+                        class="px-2.5 py-0.5 rounded bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-[10px] font-mono text-cyan-300 flex items-center gap-1 transition whitespace-nowrap shrink-0">
                         <span id="btn-toggle-right-text">Скрыть инспектор ✕</span>
                     </button>
                 </div>
 
                 <!-- Лента быстрых интерактивных аббревиатур -->
-                <div class="flex items-center gap-1 overflow-x-auto no-scrollbar whitespace-nowrap py-0.5 border-t border-slate-800 pt-1">
+                <div
+                    class="flex items-center gap-1 overflow-x-auto no-scrollbar whitespace-nowrap py-0.5 border-t border-slate-800 pt-1">
                     <span class="text-[10px] font-mono text-slate-400 mr-1 shrink-0">Термины:</span>
-                    <button onclick="showAbbrBubble('SOC', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shrink-0">SOC</button>
-                    <button onclick="showAbbrBubble('NG SOAR', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">NG SOAR</button>
-                    <button onclick="showAbbrBubble('SIEM', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shrink-0">SIEM</button>
-                    <button onclick="showAbbrBubble('EDR', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/15 text-rose-300 border border-rose-500/30 shrink-0">EDR</button>
-                    <button onclick="showAbbrBubble('KRaft', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">KRaft</button>
-                    <button onclick="showAbbrBubble('ClickHouse', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">ClickHouse</button>
-                    <button onclick="showAbbrBubble('PostgreSQL', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/15 text-rose-300 border border-rose-500/30 shrink-0">PostgreSQL HA</button>
-                    <button onclick="showAbbrBubble('RELP', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500/15 text-purple-300 border border-purple-500/30 shrink-0">RELP</button>
-                    <button onclick="showAbbrBubble('TAP', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-blue-500/15 text-blue-300 border border-blue-500/30 shrink-0">TAP</button>
-                    <button onclick="showAbbrBubble('NPB', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-blue-500/15 text-blue-300 border border-blue-500/30 shrink-0">NPB</button>
-                    <button onclick="showAbbrBubble('NCSC', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">NCSC</button>
-                    <button onclick="showAbbrBubble('VNCERT/CC', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">VNCERT/CC</button>
-                    <button onclick="showAbbrBubble('A05 MPS', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">A05 MPS (72ч)</button>
-                    <button onclick="showAbbrBubble('ГосСОПКА', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">ГосСОПКА</button>
-                    <button onclick="showAbbrBubble('CVSS', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/15 text-rose-300 border border-rose-500/30 shrink-0">CVSS/EPSS</button>
-                    <button onclick="showAbbrBubble('HITL', event)" class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">HITL</button>
+                    <button onclick="showAbbrBubble('SOC', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shrink-0">SOC</button>
+                    <button onclick="showAbbrBubble('NG SOAR', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">NG
+                        SOAR</button>
+                    <button onclick="showAbbrBubble('SIEM', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shrink-0">SIEM</button>
+                    <button onclick="showAbbrBubble('EDR', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/15 text-rose-300 border border-rose-500/30 shrink-0">EDR</button>
+                    <button onclick="showAbbrBubble('KRaft', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">KRaft</button>
+                    <button onclick="showAbbrBubble('ClickHouse', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">ClickHouse</button>
+                    <button onclick="showAbbrBubble('PostgreSQL', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/15 text-rose-300 border border-rose-500/30 shrink-0">PostgreSQL
+                        HA</button>
+                    <button onclick="showAbbrBubble('RELP', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500/15 text-purple-300 border border-purple-500/30 shrink-0">RELP</button>
+                    <button onclick="showAbbrBubble('TAP', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-blue-500/15 text-blue-300 border border-blue-500/30 shrink-0">TAP</button>
+                    <button onclick="showAbbrBubble('NPB', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-blue-500/15 text-blue-300 border border-blue-500/30 shrink-0">NPB</button>
+                    <button onclick="showAbbrBubble('NCSC', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">NCSC</button>
+                    <button onclick="showAbbrBubble('VNCERT/CC', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">VNCERT/CC</button>
+                    <button onclick="showAbbrBubble('A05 MPS', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">A05
+                        MPS (72ч)</button>
+                    <button onclick="showAbbrBubble('ГосСОПКА', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">ГосСОПКА</button>
+                    <button onclick="showAbbrBubble('CVSS', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/15 text-rose-300 border border-rose-500/30 shrink-0">CVSS/EPSS</button>
+                    <button onclick="showAbbrBubble('HITL', event)"
+                        class="abbr-chip px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">HITL</button>
                 </div>
             </div>
 
             <!-- СПЕЦИАЛИЗИРОВАННАЯ ВЕРХНЯЯ ПАНЕЛЬ ДЛЯ МОБИЛЬНОГО РЕЖИМА  (100% НЕПРОЗРАЧНАЯ) -->
-            <div id="s25-top-header" class="hidden z-20 solid-bg-panel border-b border-slate-800 px-3 pt-2 pb-2 flex flex-col gap-2 shrink-0 shadow-lg">
+            <div id="s25-top-header"
+                class="hidden z-20 solid-bg-panel border-b border-slate-800 px-3 pt-2 pb-2 flex flex-col gap-2 shrink-0 shadow-lg">
                 <!-- Имитация статус-бара смартфона S25 + Переключатель вида UML -->
                 <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-1.5">
@@ -369,51 +571,78 @@
                         <span class="text-[11px] font-mono font-bold text-white tracking-tight">Mobile UML</span>
                     </div>
                     <!-- Переключатель между читаемым вертикальным UML-потоком и 2D-чертежом -->
-                    <div class="flex items-center solid-bg-main p-0.5 rounded-lg border border-slate-700 text-[10px] font-mono">
-                        <button id="btn-s25-view-cards" onclick="setS25ViewMode('cards')" class="px-2 py-1 rounded bg-cyan-500 text-slate-950 font-bold transition">
+                    <div
+                        class="flex items-center solid-bg-main p-0.5 rounded-lg border border-slate-700 text-[10px] font-mono">
+                        <button id="btn-s25-view-cards" onclick="setS25ViewMode('cards')"
+                            class="px-2 py-1 rounded bg-cyan-500 text-slate-950 font-bold transition">
                             📱 UML-Поток
                         </button>
-                        <button id="btn-s25-view-canvas" onclick="setS25ViewMode('canvas')" class="px-2 py-1 rounded text-slate-300 hover:text-white transition">
+                        <button id="btn-s25-view-canvas" onclick="setS25ViewMode('canvas')"
+                            class="px-2 py-1 rounded text-slate-300 hover:text-white transition">
                             📐 2D Чертеж
                         </button>
                     </div>
                 </div>
 
                 <!-- Горизонтальный фильтр по 7 сетевым зонам ЦОД в S25 -->
-                <div id="s25-zone-pills" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar whitespace-nowrap py-0.5">
-                    <button onclick="selectS25ZoneFilter('ALL')" id="s25-pill-ALL" class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-semibold bg-cyan-500 text-slate-950 shrink-0">Все 7 зон (18)</button>
-                    <button onclick="selectS25ZoneFilter('z_ext')" id="s25-pill-z_ext" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-sky-300 border border-slate-700 shrink-0">0. Внешний & Wi-Fi</button>
-                    <button onclick="selectS25ZoneFilter('z_edge')" id="s25-pill-z_edge" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-cyan-300 border border-slate-700 shrink-0">1. Edge / TAP / NPB</button>
-                    <button onclick="selectS25ZoneFilter('z_dmz')" id="s25-pill-z_dmz" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-amber-300 border border-slate-700 shrink-0">2. Ingest DMZ</button>
-                    <button onclick="selectS25ZoneFilter('z_srv')" id="s25-pill-z_srv" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-emerald-300 border border-slate-700 shrink-0">3. Ядро SV5 & Kafka</button>
-                    <button onclick="selectS25ZoneFilter('z_db')" id="s25-pill-z_db" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-rose-300 border border-slate-700 shrink-0">4. СУБД & Keeper</button>
-                    <button onclick="selectS25ZoneFilter('z_admin')" id="s25-pill-z_admin" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-purple-300 border border-slate-700 shrink-0">5. Смена SOC L1-L3</button>
-                    <button onclick="selectS25ZoneFilter('z_oob')" id="s25-pill-z_oob" class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-fuchsia-300 border border-slate-700 shrink-0">6. OOB / PAM / NTP</button>
+                <div id="s25-zone-pills"
+                    class="flex items-center gap-1.5 overflow-x-auto no-scrollbar whitespace-nowrap py-0.5">
+                    <button onclick="selectS25ZoneFilter('ALL')" id="s25-pill-ALL"
+                        class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-semibold bg-cyan-500 text-slate-950 shrink-0">Все
+                        7 зон (18)</button>
+                    <button onclick="selectS25ZoneFilter('z_ext')" id="s25-pill-z_ext"
+                        class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-sky-300 border border-slate-700 shrink-0">0.
+                        Внешний & Wi-Fi</button>
+                    <button onclick="selectS25ZoneFilter('z_edge')" id="s25-pill-z_edge"
+                        class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-cyan-300 border border-slate-700 shrink-0">1.
+                        Edge / TAP / NPB</button>
+                    <button onclick="selectS25ZoneFilter('z_dmz')" id="s25-pill-z_dmz"
+                        class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-amber-300 border border-slate-700 shrink-0">2.
+                        Ingest DMZ</button>
+                    <button onclick="selectS25ZoneFilter('z_srv')" id="s25-pill-z_srv"
+                        class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-emerald-300 border border-slate-700 shrink-0">3.
+                        Ядро SV5 & Kafka</button>
+                    <button onclick="selectS25ZoneFilter('z_db')" id="s25-pill-z_db"
+                        class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-rose-300 border border-slate-700 shrink-0">4.
+                        СУБД & Keeper</button>
+                    <button onclick="selectS25ZoneFilter('z_admin')" id="s25-pill-z_admin"
+                        class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-purple-300 border border-slate-700 shrink-0">5.
+                        Смена SOC L1-L3</button>
+                    <button onclick="selectS25ZoneFilter('z_oob')" id="s25-pill-z_oob"
+                        class="px-2.5 py-1 rounded-lg text-[10px] font-mono solid-bg-card text-fuchsia-300 border border-slate-700 shrink-0">6.
+                        OOB / PAM / NTP</button>
                 </div>
             </div>
 
             <!-- МОБИЛЬНЫЙ ВЕРТИКАЛЬНЫЙ UML-ПОТОК ДЛЯ SAMSUNG S25 (100% НЕПРОЗРАЧНЫЙ, КРИСТАЛЬНО ЧИТАЕМЫЙ) -->
-            <div id="s25-vertical-uml-view" class="hidden flex-1 overflow-y-auto px-3 pt-2.5 pb-20 space-y-4 solid-bg-main select-text">
+            <div id="s25-vertical-uml-view"
+                class="hidden flex-1 overflow-y-auto px-3 pt-2.5 pb-20 space-y-4 solid-bg-main select-text">
                 <!-- Заполняется динамически из JS -->
             </div>
 
             <!-- ГЛАВНЫЙ МАСШТАБИРУЕМЫЙ 2D SVG-ЧЕРТЕЖ UML 2.5 -->
-            <div id="svg-stage" class="flex-1 w-full h-full relative overflow-hidden cursor-grab active:cursor-grabbing">
+            <div id="svg-stage"
+                class="flex-1 w-full h-full relative overflow-hidden cursor-grab active:cursor-grabbing">
                 <svg id="uml-svg" class="w-full h-full block" xmlns="http://www.w3.org/2000/svg">
                     <defs id="uml-svg-defs">
-                        <marker id="arrow-cyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <marker id="arrow-cyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6"
+                            orient="auto-start-reverse">
                             <path d="M 0 1 L 10 5 L 0 9 z" fill="#22d3ee" />
                         </marker>
-                        <marker id="arrow-rose" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <marker id="arrow-rose" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6"
+                            orient="auto-start-reverse">
                             <path d="M 0 1 L 10 5 L 0 9 z" fill="#fb7185" />
                         </marker>
-                        <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6"
+                            orient="auto-start-reverse">
                             <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24" />
                         </marker>
-                        <marker id="arrow-emerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <marker id="arrow-emerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6"
+                            markerHeight="6" orient="auto-start-reverse">
                             <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399" />
                         </marker>
-                        <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6"
+                            orient="auto-start-reverse">
                             <path d="M 0 1 L 10 5 L 0 9 z" fill="#c084fc" />
                         </marker>
                     </defs>
@@ -427,37 +656,57 @@
                 </svg>
 
                 <!-- ПЛАВАЮЩИЕ КОНТРОЛЫ КАМЕРЫ НА 2D-ЧЕРТЕЖЕ -->
-                <div id="floating-zoom-bar" class="absolute bottom-4 left-4 z-20 flex items-center gap-1.5 solid-bg-panel border border-slate-700 p-1.5 rounded-xl shadow-2xl">
-                    <button onclick="zoomCamera(1.25)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-mono font-bold text-base transition" title="Приблизить (+)">+</button>
-                    <button onclick="zoomCamera(0.8)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-mono font-bold text-base transition" title="Отдалить (-)">−</button>
-                    <button onclick="fitDiagramToScreen(true)" class="px-2.5 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-xs transition" title="Вписать весь чертеж целиком">Весь чертеж</button>
-                    <button onclick="focusReadableCore()" class="px-2.5 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 font-mono text-xs transition" title="Крупный план ядра Security Vision 5">Ядро SV5</button>
-                    <button onclick="toggleFlowAnimation()" id="btn-toggle-anim" class="px-2.5 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-mono text-xs transition flex items-center gap-1.5">
+                <div id="floating-zoom-bar"
+                    class="absolute bottom-4 left-4 z-20 flex items-center gap-1.5 solid-bg-panel border border-slate-700 p-1.5 rounded-xl shadow-2xl">
+                    <button onclick="zoomCamera(1.25)"
+                        class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-mono font-bold text-base transition"
+                        title="Приблизить (+)">+</button>
+                    <button onclick="zoomCamera(0.8)"
+                        class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-mono font-bold text-base transition"
+                        title="Отдалить (-)">−</button>
+                    <button onclick="fitDiagramToScreen(true)"
+                        class="px-2.5 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-xs transition"
+                        title="Вписать весь чертеж целиком">Весь чертеж</button>
+                    <button onclick="focusReadableCore()"
+                        class="px-2.5 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 font-mono text-xs transition"
+                        title="Крупный план ядра Security Vision 5">Ядро SV5</button>
+                    <button onclick="toggleFlowAnimation()" id="btn-toggle-anim"
+                        class="px-2.5 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-mono text-xs transition flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
                         <span class="hidden sm:inline">Потоки: ВКЛ</span>
                     </button>
                 </div>
 
                 <!-- ПОШАГОВЫЙ НАВИГАТОР ПО УЗЛАМ ДЛЯ 2D-ЧЕРТЕЖА В РЕЖИМЕ S25 -->
-                <div id="s25-canvas-stepper" class="hidden absolute bottom-16 inset-x-2.5 z-20 solid-bg-panel border border-cyan-500/50 rounded-xl p-2 shadow-2xl flex items-center justify-between gap-2">
-                    <button onclick="stepMobileNode(-1)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-xs font-bold shrink-0">◀ Пред.</button>
+                <div id="s25-canvas-stepper"
+                    class="hidden absolute bottom-16 inset-x-2.5 z-20 solid-bg-panel border border-cyan-500/50 rounded-xl p-2 shadow-2xl flex items-center justify-between gap-2">
+                    <button onclick="stepMobileNode(-1)"
+                        class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-xs font-bold shrink-0">◀
+                        Пред.</button>
                     <div onclick="toggleMobileInspectorSheet(true)" class="min-w-0 flex-1 text-center cursor-pointer">
-                        <div id="s25-stepper-title" class="text-xs font-bold text-white truncate">Кластер 7 Фоновых Сервисов</div>
+                        <div id="s25-stepper-title" class="text-xs font-bold text-white truncate">Кластер 7 Фоновых
+                            Сервисов</div>
                         <div class="text-[10px] font-mono text-cyan-400">Нажмите для открытия спецификации ⓘ</div>
                     </div>
-                    <button onclick="stepMobileNode(1)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-xs font-bold shrink-0">След. ▶</button>
+                    <button onclick="stepMobileNode(1)"
+                        class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-xs font-bold shrink-0">След.
+                        ▶</button>
                 </div>
             </div>
         </main>
 
         <!-- ПРАВАЯ ИНСПЕКТОР-ПАНЕЛЬ (ДЛЯ DESKTOP-РЕЖИМА) -->
-        <aside id="right-inspector" class="w-80 lg:w-96 solid-bg-panel border-l border-slate-800 flex flex-col z-20 shrink-0 select-text overflow-y-auto transition-all">
-            <div class="px-4 py-2.5 border-b border-slate-800 flex items-center justify-between solid-bg-card sticky top-0 z-10">
+        <aside id="right-inspector"
+            class="w-80 lg:w-96 solid-bg-panel border-l border-slate-800 flex flex-col z-20 shrink-0 select-text overflow-y-auto transition-all">
+            <div
+                class="px-4 py-2.5 border-b border-slate-800 flex items-center justify-between solid-bg-card sticky top-0 z-10">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-cyan-300 font-bold">Инспектор спецификаций</span>
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-cyan-300 font-bold">Инспектор
+                        спецификаций</span>
                 </div>
-                <button onclick="toggleRightInspector(false)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 border border-slate-700 text-slate-300 text-xs font-mono transition flex items-center gap-1">
+                <button onclick="toggleRightInspector(false)"
+                    class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 border border-slate-700 text-slate-300 text-xs font-mono transition flex items-center gap-1">
                     <span>Скрыть</span>
                     <span>✕</span>
                 </button>
@@ -466,38 +715,62 @@
         </aside>
 
         <!-- НИЖНИЙ ДОК НАВИГАЦИИ ДЛЯ РЕЖИМА  (100% НЕПРОЗРАЧНЫЙ) -->
-        <div id="mobile-s25-bar" class="hidden absolute bottom-0 left-0 right-0 solid-bg-panel border-t border-slate-800 px-2 py-1.5 z-30 flex items-center justify-around shadow-2xl">
-            <button onclick="setS25ViewMode('cards')" id="nav-s25-flow" class="flex flex-col items-center gap-0.5 text-cyan-400 font-mono text-[10px] px-2 py-1">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        <div id="mobile-s25-bar"
+            class="hidden absolute bottom-0 left-0 right-0 solid-bg-panel border-t border-slate-800 px-2 py-1.5 z-30 flex items-center justify-around shadow-2xl">
+            <button onclick="setS25ViewMode('cards')" id="nav-s25-flow"
+                class="flex flex-col items-center gap-0.5 text-cyan-400 font-mono text-[10px] px-2 py-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
                 <span>UML-Поток</span>
             </button>
-            <button onclick="setS25ViewMode('canvas')" id="nav-s25-cad" class="flex flex-col items-center gap-0.5 text-slate-400 font-mono text-[10px] px-2 py-1">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+            <button onclick="setS25ViewMode('canvas')" id="nav-s25-cad"
+                class="flex flex-col items-center gap-0.5 text-slate-400 font-mono text-[10px] px-2 py-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
                 <span>2D Чертеж</span>
             </button>
-            <button onclick="toggleMobileInspectorSheet(true)" class="flex flex-col items-center gap-0.5 text-emerald-400 font-mono text-[10px] px-2 py-1">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+            <button onclick="toggleMobileInspectorSheet(true)"
+                class="flex flex-col items-center gap-0.5 text-emerald-400 font-mono text-[10px] px-2 py-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
                 <span>Инспектор</span>
             </button>
-            <button onclick="openModal('glossary-modal')" class="flex flex-col items-center gap-0.5 text-amber-400 font-mono text-[10px] px-2 py-1">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            <button onclick="openModal('glossary-modal')"
+                class="flex flex-col items-center gap-0.5 text-amber-400 font-mono text-[10px] px-2 py-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
                 <span>Глоссарий</span>
             </button>
-            <button onclick="openModal('calc-modal')" class="flex flex-col items-center gap-0.5 text-purple-400 font-mono text-[10px] px-2 py-1">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            <button onclick="openModal('calc-modal')"
+                class="flex flex-col items-center gap-0.5 text-purple-400 font-mono text-[10px] px-2 py-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
                 <span>Сайзинг</span>
             </button>
         </div>
 
         <!-- ЗАТЕМНЯЮЩАЯ ПОДЛОЖКА И 100% НЕПРОЗРАЧНЫЙ BOTTOM-SHEET ИНСПЕКТОРА ДЛЯ SAMSUNG S25 -->
-        <div id="mobile-sheet-backdrop" onclick="toggleMobileInspectorSheet(false)" class="hidden absolute inset-0 bg-black/80 z-30 transition-opacity"></div>
-        <div id="mobile-bottom-sheet" class="hidden absolute inset-x-0 bottom-14 solid-bg-panel border-t-2 border-cyan-400 rounded-t-3xl shadow-2xl z-40 max-h-[78%] flex flex-col overflow-hidden">
+        <div id="mobile-sheet-backdrop" onclick="toggleMobileInspectorSheet(false)"
+            class="hidden absolute inset-0 bg-black/80 z-30 transition-opacity"></div>
+        <div id="mobile-bottom-sheet"
+            class="hidden absolute inset-x-0 bottom-14 solid-bg-panel border-t-2 border-cyan-400 rounded-t-3xl shadow-2xl z-40 max-h-[78%] flex flex-col overflow-hidden">
             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800 solid-bg-card shrink-0">
                 <div class="flex items-center gap-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
                     <span class="text-xs font-mono text-cyan-300 uppercase font-bold">Спецификация узла / стыка</span>
                 </div>
-                <button onclick="toggleMobileInspectorSheet(false)" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-200 text-xs font-mono font-semibold border border-slate-700">
+                <button onclick="toggleMobileInspectorSheet(false)"
+                    class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-200 text-xs font-mono font-semibold border border-slate-700">
                     Закрыть ✕
                 </button>
             </div>
@@ -506,24 +779,33 @@
     </div>
 
     <!-- ВСПЛЫВАЮЩИЙ ИНТЕРАКТИВНЫЙ БАББЛ АББРЕВИАТУРЫ (100% НЕПРОЗРАЧНЫЙ) -->
-    <div id="abbr-bubble" class="hidden fixed z-50 w-[340px] sm:w-[370px] solid-bg-panel border-2 border-cyan-400 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-4 select-text">
+    <div id="abbr-bubble"
+        class="hidden fixed z-50 w-[340px] sm:w-[370px] solid-bg-panel border-2 border-cyan-400 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-4 select-text">
         <div class="flex items-start justify-between gap-2 border-b border-slate-800 pb-2.5">
             <div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <span id="bubble-code" class="font-mono font-bold text-base text-cyan-300">SIEM</span>
-                    <span id="bubble-domain" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">SOT Domain</span>
+                    <span id="bubble-domain"
+                        class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">SOT
+                        Domain</span>
                 </div>
-                <div id="bubble-full" class="text-xs font-semibold text-white mt-1 leading-snug">Security Information and Event Management</div>
+                <div id="bubble-full" class="text-xs font-semibold text-white mt-1 leading-snug">Security Information
+                    and Event Management</div>
             </div>
-            <button onclick="hideAbbrBubble()" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono shrink-0">✕</button>
+            <button onclick="hideAbbrBubble()"
+                class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono shrink-0">✕</button>
         </div>
         <p id="bubble-desc" class="text-xs text-slate-200 mt-2.5 leading-relaxed"></p>
         <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between gap-2">
             <span class="text-[10px] font-mono text-emerald-400 flex items-center gap-1 shrink-0">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+
             </span>
-            <a id="bubble-link-url" href="#" target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-cyan-300 hover:text-cyan-200 underline flex items-center gap-1 truncate">
+            <a id="bubble-link-url" href="#" target="_blank" rel="noopener noreferrer"
+                class="text-xs font-mono text-cyan-300 hover:text-cyan-200 underline flex items-center gap-1 truncate">
                 <span id="bubble-link-title" class="truncate">Wikipedia</span>
                 <span>↗</span>
             </a>
@@ -531,8 +813,10 @@
     </div>
 
     <!-- МОДАЛЬНОЕ ОКНО: ПОЛНЫЙ ГЛОССАРИЙ И ВАЛИДАТОР ССЫЛОК (100% НЕПРОЗРАЧНОЕ) -->
-    <div id="glossary-modal" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-3 sm:p-6 select-text">
-        <div class="solid-bg-panel border border-slate-700 rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div id="glossary-modal"
+        class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-3 sm:p-6 select-text">
+        <div
+            class="solid-bg-panel border border-slate-700 rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between solid-bg-card">
                 <div>
                     <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
@@ -540,28 +824,37 @@
                         <span>45 терминов, протоколов и стандартов СРВ / РФ / Международных</span>
                     </h2>
                 </div>
-                <button onclick="closeModal('glossary-modal')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 font-mono text-xs border border-slate-700">Закрыть ✕</button>
+                <button onclick="closeModal('glossary-modal')"
+                    class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 font-mono text-xs border border-slate-700">Закрыть
+                    ✕</button>
             </div>
             <div class="p-3 border-b border-slate-800 solid-bg-main">
-                <input id="glossary-filter-input" type="text" placeholder="Фильтр по аббревиатуре, расшифровке или домену (например: KRaft, NCSC, TCVN, RELP, EDR)..."
+                <input id="glossary-filter-input" type="text"
+                    placeholder="Фильтр по аббревиатуре, расшифровке или домену (например: KRaft, NCSC, TCVN, RELP, EDR)..."
                     class="w-full solid-bg-card border border-slate-700 focus:border-cyan-400 rounded-xl px-3.5 py-2 text-xs font-mono text-white placeholder-slate-500 outline-none">
             </div>
-            <div id="glossary-grid" class="p-4 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3 solid-bg-panel"></div>
+            <div id="glossary-grid" class="p-4 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3 solid-bg-panel">
+            </div>
         </div>
     </div>
 
     <!-- МОДАЛЬНОЕ ОКНО: ИНЖЕНЕРНЫЙ КАЛЬКУЛЯТОР САЙЗИНГА ЦОД И СЦЕНАРИИ ТРАБЛШУТИНГА -->
-    <div id="calc-modal" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-3 sm:p-6 select-text">
-        <div class="solid-bg-panel border border-slate-700 rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div id="calc-modal"
+        class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-3 sm:p-6 select-text">
+        <div
+            class="solid-bg-panel border border-slate-700 rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between solid-bg-card">
                 <div>
                     <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                         <span class="text-emerald-400 font-mono">[САЙЗИНГ ЦОД & ТЮНИНГ]</span>
                         <span>Математический расчет мощности по формулам документа</span>
                     </h2>
-                    <p class="text-[11px] text-slate-400 font-mono">Расчет полосы пропускания, СХД ClickHouse (Hot/Warm/Cold), брокеров Kafka и узлов Security Vision 5</p>
+                    <p class="text-[11px] text-slate-400 font-mono">Расчет полосы пропускания, СХД ClickHouse
+                        (Hot/Warm/Cold), брокеров Kafka и узлов Security Vision 5</p>
                 </div>
-                <button onclick="closeModal('calc-modal')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 font-mono text-xs border border-slate-700">Закрыть ✕</button>
+                <button onclick="closeModal('calc-modal')"
+                    class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 font-mono text-xs border border-slate-700">Закрыть
+                    ✕</button>
             </div>
 
             <div class="p-4 overflow-y-auto space-y-5 solid-bg-panel">
@@ -569,30 +862,39 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3 solid-bg-card p-4 rounded-xl border border-slate-800">
                     <div>
                         <label class="text-[11px] font-mono text-slate-400 block">Поток событий (EPS):</label>
-                        <input id="calc-eps" type="number" value="25000" min="1000" max="300000" step="1000" onchange="runSizingCalculator()"
+                        <input id="calc-eps" type="number" value="25000" min="1000" max="300000" step="1000"
+                            onchange="runSizingCalculator()"
                             class="w-full mt-1 solid-bg-main border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-sm text-cyan-300 font-bold">
                         <div class="flex gap-1 mt-1.5">
-                            <button onclick="setQuickEps(10000)" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-cyan-300">10k</button>
-                            <button onclick="setQuickEps(25000)" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300">25k</button>
-                            <button onclick="setQuickEps(50000)" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-cyan-300">50k</button>
-                            <button onclick="setQuickEps(100000)" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">100k</button>
+                            <button onclick="setQuickEps(10000)"
+                                class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-cyan-300">10k</button>
+                            <button onclick="setQuickEps(25000)"
+                                class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300">25k</button>
+                            <button onclick="setQuickEps(50000)"
+                                class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-cyan-300">50k</button>
+                            <button onclick="setQuickEps(100000)"
+                                class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">100k</button>
                         </div>
                     </div>
                     <div>
                         <label class="text-[11px] font-mono text-slate-400 block">Средний размер лога (Байт):</label>
-                        <input id="calc-size" type="number" value="600" min="200" max="4096" step="50" onchange="runSizingCalculator()"
+                        <input id="calc-size" type="number" value="600" min="200" max="4096" step="50"
+                            onchange="runSizingCalculator()"
                             class="w-full mt-1 solid-bg-main border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-sm text-white">
                         <span class="text-[10px] text-slate-500 font-mono">Норма: 500–800 байт</span>
                     </div>
                     <div>
-                        <label class="text-[11px] font-mono text-slate-400 block">Срок хранения (Retention, сут):</label>
-                        <input id="calc-days" type="number" value="90" min="14" max="730" step="10" onchange="runSizingCalculator()"
+                        <label class="text-[11px] font-mono text-slate-400 block">Срок хранения (Retention,
+                            сут):</label>
+                        <input id="calc-days" type="number" value="90" min="14" max="730" step="10"
+                            onchange="runSizingCalculator()"
                             class="w-full mt-1 solid-bg-main border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-sm text-white">
                         <span class="text-[10px] text-slate-500 font-mono">Hot 14д + Warm 76д + Cold S3</span>
                     </div>
                     <div>
                         <label class="text-[11px] font-mono text-slate-400 block">Сжатие СУБД (C_ratio):</label>
-                        <select id="calc-compression" onchange="runSizingCalculator()" class="w-full mt-1 solid-bg-main border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-xs text-emerald-300">
+                        <select id="calc-compression" onchange="runSizingCalculator()"
+                            class="w-full mt-1 solid-bg-main border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-xs text-emerald-300">
                             <option value="6">ClickHouse ZSTD (6x сжатие)</option>
                             <option value="1.5">OpenSearch (1.5x сжатие)</option>
                         </select>
@@ -605,23 +907,44 @@
 
                 <!-- Памятка по аварийному траблшутингу из документа -->
                 <div class="solid-bg-card border border-slate-800 rounded-xl p-4">
-                    <h3 class="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold mb-2.5">Инженерный практикум: 4 ключевых аварийных сценария и тюнинг</h3>
+                    <h3 class="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold mb-2.5">Инженерный
+                        практикум: 4 ключевых аварийных сценария и тюнинг</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                         <div class="solid-bg-main p-3 rounded-lg border border-slate-800">
-                            <div class="font-mono font-bold text-cyan-300">1. Потери Syslog UDP (rx_missed_errors / UdpRcvbufErrors)</div>
-                            <p class="text-slate-300 mt-1 leading-relaxed">Проверка NIC: <code class="text-amber-300 font-mono">ethtool -S eth0</code> → расширение Ring Buffer: <code class="text-emerald-300 font-mono">ethtool -G eth0 rx 4096 tx 4096</code>. В ядре Linux: <code class="text-emerald-300 font-mono">net.core.rmem_max=67108864</code> (64 МБ), <code class="text-emerald-300 font-mono">netdev_max_backlog=100000</code>.</p>
+                            <div class="font-mono font-bold text-cyan-300">1. Потери Syslog UDP (rx_missed_errors /
+                                UdpRcvbufErrors)</div>
+                            <p class="text-slate-300 mt-1 leading-relaxed">Проверка NIC: <code
+                                    class="text-amber-300 font-mono">ethtool -S eth0</code> → расширение Ring Buffer:
+                                <code class="text-emerald-300 font-mono">ethtool -G eth0 rx 4096 tx 4096</code>. В ядре
+                                Linux: <code class="text-emerald-300 font-mono">net.core.rmem_max=67108864</code> (64
+                                МБ), <code class="text-emerald-300 font-mono">netdev_max_backlog=100000</code>.
+                            </p>
                         </div>
                         <div class="solid-bg-main p-3 rounded-lg border border-slate-800">
                             <div class="font-mono font-bold text-rose-300">2. ClickHouse перешел в Read-Only Mode</div>
-                            <p class="text-slate-300 mt-1 leading-relaxed">Проверка кворума: <code class="text-amber-300 font-mono">echo mntr | nc keeper-1 9181</code>. Причина — I/O spikes от слияний (merges) при совмещении ролей. Вынести <strong>ClickHouse Keeper</strong> на 3 выделенных узла с NVMe.</p>
+                            <p class="text-slate-300 mt-1 leading-relaxed">Проверка кворума: <code
+                                    class="text-amber-300 font-mono">echo mntr | nc keeper-1 9181</code>. Причина — I/O
+                                spikes от слияний (merges) при совмещении ролей. Вынести <strong>ClickHouse
+                                    Keeper</strong> на 3 выделенных узла с NVMe.</p>
                         </div>
                         <div class="solid-bg-main p-3 rounded-lg border border-slate-800">
                             <div class="font-mono font-bold text-amber-300">3. Рост Consumer Lag в Apache Kafka</div>
-                            <p class="text-slate-300 mt-1 leading-relaxed">При Data Skew в одной партиции — переключить продюсер на <code class="text-emerald-300 font-mono">Round-Robin</code>. При равномерном лаге — укрупнить пачки в Vector: <code class="text-emerald-300 font-mono">batch.max_events=100000</code>, <code class="text-emerald-300 font-mono">batch.timeout_secs=5</code>.</p>
+                            <p class="text-slate-300 mt-1 leading-relaxed">При Data Skew в одной партиции — переключить
+                                продюсер на <code class="text-emerald-300 font-mono">Round-Robin</code>. При равномерном
+                                лаге — укрупнить пачки в Vector: <code
+                                    class="text-emerald-300 font-mono">batch.max_events=100000</code>, <code
+                                    class="text-emerald-300 font-mono">batch.timeout_secs=5</code>.</p>
                         </div>
                         <div class="solid-bg-main p-3 rounded-lg border border-slate-800">
-                            <div class="font-mono font-bold text-emerald-300">4. Тюнинг PostgreSQL HA (64 ГБ RAM, до 300k хостов)</div>
-                            <p class="text-slate-300 mt-1 leading-relaxed"><code class="text-cyan-300 font-mono">shared_buffers=16GB</code>, <code class="text-cyan-300 font-mono">effective_cache_size=48GB</code>, <code class="text-cyan-300 font-mono">work_mem=64MB–128MB</code>, защита от Table Bloat: <code class="text-cyan-300 font-mono">autovacuum_vacuum_scale_factor=0.02</code> + пулер <strong>PgBouncer</strong>.</p>
+                            <div class="font-mono font-bold text-emerald-300">4. Тюнинг PostgreSQL HA (64 ГБ RAM, до
+                                300k хостов)</div>
+                            <p class="text-slate-300 mt-1 leading-relaxed"><code
+                                    class="text-cyan-300 font-mono">shared_buffers=16GB</code>, <code
+                                    class="text-cyan-300 font-mono">effective_cache_size=48GB</code>, <code
+                                    class="text-cyan-300 font-mono">work_mem=64MB–128MB</code>, защита от Table Bloat:
+                                <code class="text-cyan-300 font-mono">autovacuum_vacuum_scale_factor=0.02</code> + пулер
+                                <strong>PgBouncer</strong>.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -2061,10 +2384,10 @@
                         <!-- Список UML-компонентов внутри зоны -->
                         <div class="p-2.5 space-y-3 solid-bg-panel">
                             ${zoneNodes.map(node => {
-                                const outEdges = UML_EDGES.filter(e => e.from === node.id);
-                                const inEdges = UML_EDGES.filter(e => e.to === node.id);
+                    const outEdges = UML_EDGES.filter(e => e.from === node.id);
+                    const inEdges = UML_EDGES.filter(e => e.to === node.id);
 
-                                return `
+                    return `
                                     <div onclick="selectNode('${node.id}', true)" class="solid-bg-card rounded-xl border-l-4 border border-slate-800 p-3 shadow-md active:scale-[0.99] transition cursor-pointer" style="border-left-color: ${node.color}">
                                         <!-- Верхняя строка компонента: стереотип и кнопка 2D -->
                                         <div class="flex items-center justify-between gap-2">
@@ -2099,8 +2422,8 @@
                                                 Сетевые стыки UML (${inEdges.length} вх. / ${outEdges.length} исх.):
                                             </div>
                                             ${outEdges.map(edge => {
-                                                const targetNode = UML_NODES.find(n => n.id === edge.to);
-                                                return `
+                        const targetNode = UML_NODES.find(n => n.id === edge.to);
+                        return `
                                                     <div onclick="event.stopPropagation(); inspectEdgeById('${edge.id}')" class="p-2 rounded-lg solid-bg-main border border-slate-800 flex flex-col gap-0.5">
                                                         <div class="flex items-center justify-between text-[10px] font-mono">
                                                             <span class="font-bold" style="color: ${edge.color}">ИСХ. ПОРТ ➔</span>
@@ -2109,10 +2432,10 @@
                                                         <div class="text-[11px] font-mono font-bold text-white">${edge.protocol}</div>
                                                     </div>
                                                 `;
-                                            }).join('')}
+                    }).join('')}
                                             ${inEdges.map(edge => {
-                                                const sourceNode = UML_NODES.find(n => n.id === edge.from);
-                                                return `
+                        const sourceNode = UML_NODES.find(n => n.id === edge.from);
+                        return `
                                                     <div onclick="event.stopPropagation(); inspectEdgeById('${edge.id}')" class="p-2 rounded-lg solid-bg-main border border-slate-800/70 flex flex-col gap-0.5">
                                                         <div class="flex items-center justify-between text-[10px] font-mono">
                                                             <span class="text-emerald-400 font-bold">⬅ ВХ. ПОРТ</span>
@@ -2121,11 +2444,11 @@
                                                         <div class="text-[11px] font-mono text-slate-200">${edge.protocol}</div>
                                                     </div>
                                                 `;
-                                            }).join('')}
+                    }).join('')}
                                         </div>
                                     </div>
                                 `;
-                            }).join('')}
+                }).join('')}
                         </div>
                     </div>
                 `;
@@ -2400,10 +2723,10 @@
                     <h4 class="text-[11px] font-mono uppercase tracking-wider text-purple-400 font-semibold mb-1.5">Сетевые стыки и протоколы (${connectedEdges.length})</h4>
                     <div class="space-y-2">
                         ${connectedEdges.map(e => {
-                            const isOut = e.from === node.id;
-                            const peerId = isOut ? e.to : e.from;
-                            const peerNode = UML_NODES.find(n => n.id === peerId);
-                            return `
+                const isOut = e.from === node.id;
+                const peerId = isOut ? e.to : e.from;
+                const peerNode = UML_NODES.find(n => n.id === peerId);
+                return `
                                 <div onclick="inspectEdgeById('${e.id}')" class="p-2.5 rounded-xl solid-bg-card hover:bg-slate-800 border border-slate-800 cursor-pointer transition">
                                     <div class="flex items-center justify-between text-[10px] font-mono">
                                         <span class="${isOut ? 'text-cyan-400' : 'text-emerald-400'} font-bold">${isOut ? 'ИСХОДЯЩИЙ СТЫК →' : '← ВХОДЯЩИЙ СТЫК'}</span>
@@ -2413,7 +2736,7 @@
                                     <div class="text-[11px] text-slate-300 mt-1 leading-snug">${e.desc}</div>
                                 </div>
                             `;
-                        }).join('')}
+            }).join('')}
                     </div>
                 </div>
             `;
@@ -2832,9 +3155,9 @@
             const entries = Object.entries(ABBR_DICTIONARY).filter(([code, item]) => {
                 if (!query) return true;
                 return code.toLowerCase().includes(query) ||
-                       item.full.toLowerCase().includes(query) ||
-                       item.domain.toLowerCase().includes(query) ||
-                       item.desc.toLowerCase().includes(query);
+                    item.full.toLowerCase().includes(query) ||
+                    item.domain.toLowerCase().includes(query) ||
+                    item.desc.toLowerCase().includes(query);
             });
 
             grid.innerHTML = entries.map(([code, item]) => `
@@ -2951,4 +3274,5 @@
         };
     </script>
 </body>
+
 </html>
